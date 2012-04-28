@@ -17,6 +17,8 @@ module Hive
     attr_reader :board, :insects
     attr_accessor :players, :turn
 
+    def current_player; self.players.first; end
+
     def initialize(players=[], board=nil, turn=nil, expansions={})
       @insects = StartInsects.dup
 

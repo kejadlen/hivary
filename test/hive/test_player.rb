@@ -6,12 +6,22 @@ require 'hive/insect/base'
 class TestPlayer < HiveTestCase
   def setup
     @alice = Player.new('Alice')
+
     @game = MiniTest::Mock.new
+    @alice.game = @game
   end
 
   def test_init
     assert_equal 'Alice', @alice.name
     assert_equal [], @alice.insects
+  end
+
+  def test_current_player
+    @game.expect :current_player, 0
+    refute @alice.current_player?
+
+    @game.expect :current_player, @alice
+    assert @alice.current_player?
   end
 
   def test_join_game

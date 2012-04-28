@@ -3,6 +3,8 @@ module Hive
     attr_accessor :game
     attr_reader :name, :insects
 
+    def current_player?; self.game.current_player == self; end
+
     def initialize(name)
       @name = name
       @insects = []

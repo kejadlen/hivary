@@ -32,6 +32,16 @@ class TestGame < HiveTestCase
     assert_equal 0, @game.turn
   end
 
+  def test_current_player
+    @game.players = [@alice, @bob]
+    @alice.expect :==, true, [@alice]
+    assert_equal @game.current_player, @alice
+
+    @game.players = [@bob, @alice]
+    @bob.expect :==, true, [@bob]
+    assert_equal @game.current_player, @bob
+  end
+
   def test_load
   end
 end
