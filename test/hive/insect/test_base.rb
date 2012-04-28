@@ -9,6 +9,7 @@ class TestBase < HiveTestCase
   end
 
   def test_init
+    @alice.expect :==, true, [@alice]
     assert_equal @alice, @insect.player
     assert_nil @insect.location
   end
@@ -19,5 +20,8 @@ class TestBase < HiveTestCase
     @insect.location = [0,0]
 
     assert @insect.played?
+  end
+
+  def test_place
   end
 end

@@ -11,6 +11,12 @@ module Hive
         super(location)
         @player = player
       end
+
+      def place(location)
+      end
+
+      def move(location)
+      end
     end
   end
 end

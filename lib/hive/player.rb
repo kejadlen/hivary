@@ -22,6 +22,19 @@ module Hive
     end
 
     def move(insect, location)
+      raise IllegalOperation, 'Game has not started' if self.game.turn.nil?
+      raise IllegalOperation, '' if insect.player != self
+      raise IllegalOperation, '' if self.game.current_player != self
+
+      if insect.played?
+        insect.move(location)
+      else
+        insect.place(location)
+      end
+
+      # change the current player (only if the other player can move)
+
+      self.game.turn += 1
     end
   end
 end

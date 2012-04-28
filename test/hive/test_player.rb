@@ -38,5 +38,15 @@ class TestPlayer < HiveTestCase
   end
 
   def test_move
+    insect = Insect::Base.new(@alice)
+    @alice.insects << insect
+    @alice.game = @game
+    @game.expect :turn, 0
+    @game.expect :turn=, 1, [1]
+    @game.expect :current_player, @alice
+
+    @alice.move(insect, [0,0])
+
+    @game.verify
   end
 end
