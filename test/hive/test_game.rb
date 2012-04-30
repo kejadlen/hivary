@@ -11,7 +11,6 @@ class TestGame < HiveTestCase
   end
 
   def test_init
-    assert_equal Game::StartInsects, @game.insects
     assert_equal [], @game.players
     refute_nil @game.board
     assert_equal nil, @game.turn
@@ -43,5 +42,10 @@ class TestGame < HiveTestCase
   end
 
   def test_load
+    game = Game.load({alice:{Spider:[[0,0]]},
+                      bob:{Ant:[[0,1]]}},
+                     5)
+    assert_equal [:alice, :bob], game.players
+    assert_equal 5, game.turn
   end
 end

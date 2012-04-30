@@ -1,16 +1,20 @@
+require 'set'
+
 require_relative '../hive'
 require_relative 'board'
+require_relative 'insect/all'
 
 module Hive
   class Game
-    StartInsects = { Queen:1,
-                     Spider:2,
-                     Beetle:2,
-                     Grasshopper:3,
-                     Ant:3 }
+    StartInsects = { Insect::Queen => 1,
+                     Insect::Spider => 2,
+                     Insect::Beetle => 2,
+                     Insect::Grasshopper => 3,
+                     Insect::Ant => 3 }
 
     class << self
-      def load
+      def load(data, turn=nil, expansions=[])
+        self.new(data.keys, Board.load(data), turn, expansions)
       end
     end
 
@@ -19,12 +23,15 @@ module Hive
 
     def current_player; self.players.first; end
 
-    def initialize(players=[], board=nil, turn=nil, expansions={})
+    def initialize(players=[], board=nil, turn=nil, expansions=[])
       @insects = StartInsects.dup
 
       @players = players
       @board = board || Board.new
       @turn = turn
+
+      @insects << Insect::Ladybug if expansions.include?(:ladybug)
+      @insects << Insect::Mosquito if expansions.include?(:mosquito)
     end
 
     def start!

@@ -1,13 +1,71 @@
 require_relative 'tile'
+require_relative 'insect/all'
 
 module Hive
   class Board
-    attr_reader :insects
+    class << self
+      NEIGHBORS = [[1,0], [-1,0], [0,1], [0,-1]]
 
-    def [](*location); self.insects[location]; end
+      def load(data)
+        board = self.new
+        board.tiles.delete([0,0])
+
+        data.each do |player,insects|
+          insects.each do |klass,locations|
+            locations.each do |location|
+              board[*location] = Insect.const_get(klass).new(player, location)
+            end
+          end
+        end
+
+        board
+      end
+
+      def neighbors(x, y)
+        offset = 1 - 2 * (y % 2) # the offset in the x-axis depends on the row
+        (NEIGHBORS + [[offset,1],[offset,-1]]).map {|i,j| [x+i, y+j] }.sort
+      end
+    end
+
+    attr_reader :tiles
+
+    def [](*location); self.tiles[location]; end
 
     def initialize
-      @insects = { [0,0] => EmptySpace.new(self) }
+      @tiles = { [0,0] => EmptySpace.new(self) }
+    end
+
+    def []=(*location, tile)
+      self.tiles[location] = tile
+
+      # Add empty tiles as necesssary
+      Board.neighbors(*location).each do |neighbor|
+        self[*neighbor] ||= EmptySpace.new(self)
+      end unless tile.empty_space?
+    end
+
+    def to_s
+      min_x = 0 # so each row can be offset correctly
+      rows = Hash.new {|h,k| h[k] = Hash.new } # remapping the tiles to be indexed by coordinates
+
+      # Get a row-by-row hash of the board, storing each tile as a colored letter
+      self.tiles.each do |location,tile|
+        min_x = [min_x, location[0]].min
+
+        color = (tile.empty_space?) ? 37 : (tile.player.current_player?) ? 32 : 31
+        rows[location[1]][location[0]] = "\e[#{color}m#{tile.class.to_s.split('::').last[0]}\e[0m"
+      end
+
+      # Transform the hash into the output string
+      output = rows.sort_by {|k,_| k }.reverse.inject('') do |n,(i,row)|
+        # Fill in the empty spaces
+        row = Array.new(row.keys.max - min_x + 1) {|j| row[j+min_x] or ' ' }
+
+        n << ' ' if i % 2 == 0 # offset for even rows
+        n << row.join(' ') << "\n"
+      end
+
+      output.chomp
     end
   end
 end

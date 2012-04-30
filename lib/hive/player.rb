@@ -23,16 +23,16 @@ module Hive
       end
     end
 
-    def move(insect, location)
+    def validate_move(insect)
       raise IllegalOperation, 'Game has not started' if self.game.turn.nil?
       raise IllegalOperation, '' if insect.player != self
-      raise IllegalOperation, '' if self.game.current_player != self
+      raise IllegalOperation, "Not #{player}'s turn" unless self.current_player?
+    end
 
-      if insect.played?
-        insect.move(location)
-      else
-        insect.place(location)
-      end
+    def move(insect, location)
+      self.validate_move(insect)
+
+      insect.send((insect.played?) ? :move : :place, location)
 
       # change the current player (only if the other player can move)
 
