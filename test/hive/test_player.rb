@@ -1,11 +1,8 @@
 require 'test_helper'
 
-require 'hive/player'
-require 'hive/insect/base'
-
 class TestPlayer < HiveTestCase
   def setup
-    @alice = Player.new('Alice')
+    super
 
     @game = MiniTest::Mock.new
     @alice.game = @game

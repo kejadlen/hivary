@@ -14,8 +14,14 @@ module Hive
 
     class << self
       def load(data, opts={})
+        players = data.keys
         opts[:expansions] ||= []
-        self.new(data.keys, Board.load(data), opts[:turn], opts[:expansions])
+
+        game = self.new(players, Board.load(data), opts[:turn], opts[:expansions])
+
+        players.each {|player| player.game = game }
+
+        game
       end
     end
 

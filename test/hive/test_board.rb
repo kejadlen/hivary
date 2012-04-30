@@ -1,8 +1,5 @@
 require 'test_helper'
 
-require 'hive/board'
-require 'hive/insect/all'
-
 class TestBoard < HiveTestCase
   def setup
     @board = Board.new

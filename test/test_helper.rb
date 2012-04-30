@@ -4,10 +4,15 @@ require 'simplecov'; SimpleCov.start { command_name 'MiniTest' }
 
 require 'fivemat/minitest/autorun'
 
-module Hive; end
+require 'hive'
 
 class HiveTestCase < MiniTest::Unit::TestCase
   include Hive
+
+  def setup
+    @alice = Player.new('Alice')
+    @bob = Player.new('Bob')
+  end
 end
 
 # So we don't need to do mock.expect :hash everywhere.
