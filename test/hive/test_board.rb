@@ -2,6 +2,8 @@ require 'test_helper'
 
 class TestBoard < HiveTestCase
   def setup
+    super
+
     @board = Board.new
   end
 
@@ -11,11 +13,8 @@ class TestBoard < HiveTestCase
   end
 
   def test_load
-    alice = MiniTest::Mock.new
-    bob = MiniTest::Mock.new
-
-    board = Board.load(alice => {Spider:[[0,0]]},
-                       bob   => {Ant:[[0,1]]})
+    board = Board.load(@alice => {Spider:[[0,0]]},
+                       @bob   => {Ant:[[0,1]]})
 
     assert_equal Insect::Spider, board[0,0].class
     assert_equal Insect::Ant, board[0,1].class
@@ -38,5 +37,16 @@ class TestBoard < HiveTestCase
     assert_equal insect, @board.tiles[[1,0]]
     assert_equal 7, @board.tiles.length
     assert_equal 6, @board.tiles.select {|_,tile| tile.empty_space? }.length
+  end
+
+  def test_to_s
+    alice = MiniTest::Mock.new
+    alice.expect :current_player?, true
+    bob = MiniTest::Mock.new
+    bob.expect :current_player?, true
+    board = Board.load(alice => {Spider:[[0,0]]},
+                       bob   => {Ant:[[0,1]]})
+    assert_equal " \e[37mE\e[0m \e[37mE\e[0m\n\e[37mE\e[0m \e[32mA\e[0m \e[37mE\e[0m\n \e[37mE\e[0m \e[32mS\e[0m \e[37mE\e[0m\n  \e[37mE\e[0m \e[37mE\e[0m",
+                 board.to_s
   end
 end

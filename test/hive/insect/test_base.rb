@@ -28,8 +28,31 @@ class TestBase < HiveTestCase
   end
 
   def test_valid_placements
+    game = MiniTest::Mock.new
+    @alice.game = game
+    game.expect :board, Board.load(@alice => {Base:[[0,0]]},
+                                   @bob => {Base:[[1,0]]})
+    game.expect :turn, 2
+    assert_equal [[-1,0], [0,-1], [0,1]], @insect.valid_placements
+  end
+
+  def test_invalid_placement
+    game = MiniTest::Mock.new
+    @alice.game = game
+    game.expect :board, Board.load(@alice => {Base:[[0,0]]},
+                                   @bob => {Base:[[1,0]]})
+    game.expect :turn, 2
+    assert_raises(IllegalOperation) { @insect.place([2,0]) }
   end
 
   def test_place
+    game = MiniTest::Mock.new
+    @alice.game = game
+    board = Board.load(@alice => {Base:[[0,0]]},
+                       @bob => {Base:[[1,0]]})
+    game.expect :board, board
+    game.expect :turn, 2
+    @insect.place([0,-1])
+    assert_equal @insect, board[0,-1]
   end
 end

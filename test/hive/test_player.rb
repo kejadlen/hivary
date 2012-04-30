@@ -45,17 +45,14 @@ class TestPlayer < HiveTestCase
   end
 
   def test_move
-    board = MiniTest::Mock.new
-    insect = Insect::Base.new(@alice)
-    @alice.insects << insect
-    @alice.game = @game
-    @game.expect :board, board
-    @game.expect :turn, 0
-    @game.expect :turn=, 1, [1]
     @game.expect :current_player, @alice
-
-    # @alice.move(insect, [0,0])
-
-    # @game.verify
+    @game.expect :turn, 2
+    @game.expect :turn=, 3, [3]
+    insect = MiniTest::Mock.new
+    insect.expect :player, @alice
+    insect.expect :played?, false
+    insect.expect :send, nil, [:place, [0,0]]
+    @alice.move(insect, [0,0])
+    insect.verify
   end
 end

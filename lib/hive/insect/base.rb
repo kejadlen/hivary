@@ -26,6 +26,10 @@ module Hive
 
       def place(location)
         raise IllegalOperation unless self.valid_placements.include?(location)
+
+        self.location = location
+        self.board.tiles.delete(self)
+        self.board[*location] = self
       end
 
       def valid_moves
