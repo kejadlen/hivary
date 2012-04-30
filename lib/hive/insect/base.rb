@@ -24,15 +24,6 @@ module Hive
         end
       end
 
-      def place(location)
-        raise IllegalOperation, '' if self.played?
-        raise IllegalOperation, '' unless self.valid_placements.include?(location)
-
-        self.location = location
-        self.board.tiles.delete(self)
-        self.board[*location] = self
-      end
-
       def valid_moves
         moves = self.neighbors[:spaces].reject do |neighbor|
           neighbor.neighbors[:insects].uniq == [self]
@@ -41,9 +32,17 @@ module Hive
       end
 
       def move(location)
-        raise IllegalOperation, '' unless self.played?
-        raise IllegalOperation, '' unless self.valid_moves.include?(location)
-        raise IllegalOperation, '' unless self.player.queen.played?
+        if self.played?
+          raise IllegalOperation, '' unless self.valid_moves.include?(location)
+          raise IllegalOperation, '' unless self.player.queen.played?
+        else
+          raise IllegalOperation, '' unless self.valid_placements.include?(location)
+          raise IllegalOperation, '' if self.game.turn / 3 == 2 and not self.player.queen.played? and not Queen === self
+        end
+
+        self.location = location
+        self.board.tiles.delete(self)
+        self.board[*location] = self
       end
     end
   end

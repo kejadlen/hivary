@@ -42,18 +42,11 @@ class TestBase < HiveTestCase
     game.expect :board, Board.load(@alice => {Base:[[0,0]]},
                                    @bob => {Base:[[1,0]]})
     game.expect :turn, 2
-    assert_raises(IllegalOperation) { @insect.place([2,0]) }
-  end
+    assert_raises(IllegalOperation) { @insect.move([2,0]) }
 
-  def test_place
-    game = MiniTest::Mock.new
-    @alice.game = game
-    board = Board.load(@alice => {Base:[[0,0]]},
-                       @bob => {Base:[[1,0]]})
-    game.expect :board, board
-    game.expect :turn, 2
-    @insect.place([0,-1])
-    assert_equal @insect, board[0,-1]
+    @alice.insects << Insect::Queen.new(@alice)
+    game.expect :turn, 6
+    assert_raises(IllegalOperation) { @insect.move([0,1]) }
   end
 
   def test_valid_moves
@@ -69,8 +62,6 @@ class TestBase < HiveTestCase
   end
 
   def test_invalid_moves
-    assert_raises(IllegalOperation) { @insect.move([0,0]) }
-
     board = Board.load(@alice => {Base:[[0,0]]},
                        @bob => {Base:[[1,0]]})
     game = MiniTest::Mock.new
@@ -84,6 +75,17 @@ class TestBase < HiveTestCase
     assert_raises(IllegalOperation) { board[0,0].move([1,1]) }
   end
 
-  def test_move
+  def test_unplaced_move
+    game = MiniTest::Mock.new
+    @alice.game = game
+    board = Board.load(@alice => {Base:[[0,0]]},
+                       @bob => {Base:[[1,0]]})
+    game.expect :board, board
+    game.expect :turn, 2
+    @insect.move([0,-1])
+    assert_equal @insect, board[0,-1]
+  end
+
+  def test_played_move
   end
 end
