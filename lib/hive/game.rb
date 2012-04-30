@@ -19,7 +19,14 @@ module Hive
 
         game = self.new(players, Board.load(data), opts[:turn], opts[:expansions])
 
-        players.each {|player| player.game = game }
+        players.each do |player|
+          player.game = game
+          game.insects.each do |klass,n|
+            insects = data[player][klass.to_s.split('::').last.to_sym]
+            n -= insects.length rescue 0
+            n.times { player.insects << klass.new(player) }
+          end
+        end
 
         game
       end
@@ -37,8 +44,8 @@ module Hive
       @board = board || Board.new
       @turn = turn
 
-      @insects << Insect::Ladybug if expansions.include?(:ladybug)
-      @insects << Insect::Mosquito if expansions.include?(:mosquito)
+      @insects[Insect::Ladybug] = 1 if expansions.include?(:ladybug)
+      @insects[Insect::Mosquito] = 1 if expansions.include?(:mosquito)
     end
 
     def start!

@@ -14,7 +14,7 @@ module Hive
       { spaces:spaces, insects:insects }
     end
 
-    def to_s; "<##{self.class} #{self.location}>"; end
+    def to_s; "<#{self.class.to_s.split('::').last}#{self.location}>"; end
   end
 
   class EmptySpace < Tile

@@ -25,7 +25,8 @@ module Hive
       end
 
       def place(location)
-        raise IllegalOperation unless self.valid_placements.include?(location)
+        raise IllegalOperation, '' if self.played?
+        raise IllegalOperation, '' unless self.valid_placements.include?(location)
 
         self.location = location
         self.board.tiles.delete(self)
@@ -33,9 +34,16 @@ module Hive
       end
 
       def valid_moves
+        moves = self.neighbors[:spaces].reject do |neighbor|
+          neighbor.neighbors[:insects].uniq == [self]
+        end
+        moves.map(&:location)
       end
 
       def move(location)
+        raise IllegalOperation, '' unless self.played?
+        raise IllegalOperation, '' unless self.valid_moves.include?(location)
+        raise IllegalOperation, '' unless self.player.queen.played?
       end
     end
   end

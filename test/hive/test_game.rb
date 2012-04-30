@@ -42,5 +42,7 @@ class TestGame < HiveTestCase
                      turn:5)
     assert_equal [@alice, @bob], game.players
     assert_equal 5, game.turn
+    assert_equal 11, @alice.insects.length
+    assert_equal 11, @bob.insects.length
   end
 end

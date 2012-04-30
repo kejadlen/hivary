@@ -19,6 +19,7 @@ class TestBoard < HiveTestCase
     assert_equal Insect::Spider, board[0,0].class
     assert_equal Insect::Ant, board[0,1].class
     assert_equal 10, board.tiles.length
+    assert_equal [Insect::Spider], @alice.insects.map(&:class)
   end
 
   def test_neighbors
@@ -42,8 +43,10 @@ class TestBoard < HiveTestCase
   def test_to_s
     alice = MiniTest::Mock.new
     alice.expect :current_player?, true
+    alice.expect :insects, []
     bob = MiniTest::Mock.new
     bob.expect :current_player?, true
+    bob.expect :insects, []
     board = Board.load(alice => {Spider:[[0,0]]},
                        bob   => {Ant:[[0,1]]})
     assert_equal " \e[37mE\e[0m \e[37mE\e[0m\n\e[37mE\e[0m \e[32mA\e[0m \e[37mE\e[0m\n \e[37mE\e[0m \e[32mS\e[0m \e[37mE\e[0m\n  \e[37mE\e[0m \e[37mE\e[0m",

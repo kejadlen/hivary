@@ -55,4 +55,33 @@ class TestBase < HiveTestCase
     @insect.place([0,-1])
     assert_equal @insect, board[0,-1]
   end
+
+  def test_valid_moves
+    game = MiniTest::Mock.new
+    @alice.game = game
+    @bob.game = game
+    board = Board.load(@alice => {Base:[[0,0]]},
+                       @bob => {Base:[[1,0]]})
+    game.expect :board, board
+    game.expect :current_player, @alice
+
+    assert_equal [[1,-1], [1,1]], board[0,0].valid_moves
+  end
+
+  def test_invalid_moves
+    assert_raises(IllegalOperation) { @insect.move([0,0]) }
+
+    board = Board.load(@alice => {Base:[[0,0]]},
+                       @bob => {Base:[[1,0]]})
+    game = MiniTest::Mock.new
+    game.expect :board, board
+    @alice.game = game
+
+    assert board[0,0].played?
+    assert_raises(IllegalOperation) { board[0,0].move([2,2]) }
+    assert_raises(IllegalOperation) { board[0,0].move([1,1]) }
+  end
+
+  def test_move
+  end
 end

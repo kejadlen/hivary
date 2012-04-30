@@ -14,6 +14,7 @@ module Hive
           insects.each do |klass,locations|
             locations.each do |location|
               board[*location] = Insect.const_get(klass).new(player, location)
+              player.insects << board[*location]
             end
           end
         end

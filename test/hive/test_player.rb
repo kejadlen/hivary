@@ -54,5 +54,10 @@ class TestPlayer < HiveTestCase
     insect.expect :send, nil, [:place, [0,0]]
     @alice.move(insect, [0,0])
     insect.verify
+    
+    insect.expect :played?, true
+    insect.expect :send, nil, [:move, [1,0]]
+    @alice.move(insect, [1,0])
+    insect.verify
   end
 end
