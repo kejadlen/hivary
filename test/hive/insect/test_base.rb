@@ -79,6 +79,8 @@ class TestBase < HiveTestCase
 
     assert board[0,0].played?
     assert_raises(IllegalOperation) { board[0,0].move([2,2]) }
+
+    @alice.insects << Insect::Queen.new(@alice)
     assert_raises(IllegalOperation) { board[0,0].move([1,1]) }
   end
 

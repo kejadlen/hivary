@@ -5,7 +5,7 @@ module Hive
 
     def current_player?; self.game.current_player == self; end
     def board; self.game.board; end
-    def queen; self.insects.find {|insect| Queen === insect.class }; end
+    def queen; self.insects.find {|insect| Insect::Queen === insect }; end
 
     def initialize(name)
       @name = name
