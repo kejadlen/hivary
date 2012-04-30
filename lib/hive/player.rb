@@ -4,6 +4,7 @@ module Hive
     attr_reader :name, :insects
 
     def current_player?; self.game.current_player == self; end
+    def board; self.game.board; end
 
     def initialize(name)
       @name = name

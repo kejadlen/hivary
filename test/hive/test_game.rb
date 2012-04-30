@@ -44,7 +44,7 @@ class TestGame < HiveTestCase
   def test_load
     game = Game.load({alice:{Spider:[[0,0]]},
                       bob:{Ant:[[0,1]]}},
-                     5)
+                     turn:5)
     assert_equal [:alice, :bob], game.players
     assert_equal 5, game.turn
   end

@@ -1,5 +1,6 @@
 require 'test_helper'
 
+require 'hive'
 require 'hive/board'
 require 'hive/insect/base'
 
@@ -25,14 +26,18 @@ class TestBase < HiveTestCase
     assert @insect.played?
   end
 
-  def test_valid_placements
-    @alice.expect :current_player?, false
-    assert_equal [], @insect.valid_placements
+  def test_can_place_on_second_turn
+    bob = MiniTest::Mock.new
+    @alice.expect :current_player?, true
+    @alice.expect :game, @game
+    board = Board.load(@alice => {},
+                       bob => {Base:[[0,0]]})
+    @alice.expect :board, board
+    @game.expect :turn, 1
+    assert_equal Board.neighbors(0,0), @insect.valid_placements
+  end
 
-    # @alice.expect :current_player?, true
-    # @alice.expect :game, @game
-    # @game.expect :turn, 1
-    # assert_equal Board.neighbors(0,0), @insect.valid_placements
+  def test_valid_placements
   end
 
   def test_place

@@ -32,7 +32,7 @@ module Hive
     def [](*location); self.tiles[location]; end
 
     def initialize
-      @tiles = { [0,0] => EmptySpace.new(self) }
+      @tiles = { [0,0] => EmptySpace.new(self, [0,0]) }
     end
 
     def []=(*location, tile)
@@ -40,8 +40,12 @@ module Hive
 
       # Add empty tiles as necesssary
       Board.neighbors(*location).each do |neighbor|
-        self[*neighbor] ||= EmptySpace.new(self)
+        self[*neighbor] ||= EmptySpace.new(self, neighbor)
       end unless tile.empty_space?
+    end
+
+    def empty_spaces
+      self.tiles.select {|_,v| v.empty_space? }.map {|k,_| k }
     end
 
     def to_s

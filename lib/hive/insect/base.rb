@@ -16,9 +16,12 @@ module Hive
       end
 
       def valid_placements
-        return [] unless self.player.current_player?
+        return self.board.empty_spaces if self.game.turn == 1
 
-        # return self.board.empty_spaces if self.game.turn == 1
+        self.board.empty_spaces.reject do |location|
+          neighbors = self.board[*location].neighbors[:insects]
+          neighbors.any? {|neighbor| neighbor.player != self.player }
+        end
       end
 
       def place(location)

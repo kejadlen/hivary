@@ -13,8 +13,9 @@ module Hive
                      Insect::Ant => 3 }
 
     class << self
-      def load(data, turn=nil, expansions=[])
-        self.new(data.keys, Board.load(data), turn, expansions)
+      def load(data, opts={})
+        opts[:expansions] ||= []
+        self.new(data.keys, Board.load(data), opts[:turn], opts[:expansions])
       end
     end
 
