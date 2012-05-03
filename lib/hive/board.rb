@@ -26,6 +26,26 @@ module Hive
         offset = 1 - 2 * (y % 2) # the offset in the x-axis depends on the row
         (NEIGHBORS + [[offset,1],[offset,-1]]).map {|i,j| [x+i, y+j] }.sort
       end
+      
+      def one_hive?(locations)
+        hive = Set.new
+        queue = Set[locations.first]
+
+        until queue.empty?
+          # why isn't there a Set#shift operator?
+          insect = queue.first
+          queue.delete(insect)
+
+          neighbors = self.neighbors(*insect).reject do |neighbor|
+            hive.include?(neighbor) or not locations.include?(neighbor)
+          end
+
+          hive << insect
+          queue.merge(neighbors)
+        end
+
+        hive.length == locations.length
+      end
     end
 
     attr_reader :tiles
@@ -62,11 +82,11 @@ module Hive
     end
 
     def empty_spaces
-      self.tiles.select {|_,v| v.empty_space? }.map {|k,_| k }
+      self.tiles.select {|_,v| v.empty_space? }.map {|_,v| v }
     end
 
     def insects
-      self.tiles.reject {|_,v| v.empty_space? }.map {|k,_| k }
+      self.tiles.reject {|_,v| v.empty_space? }.map {|_,v| v }
     end
 
     def to_s

@@ -15,7 +15,7 @@ class TestBase < HiveTestCase
     assert_nil @insect.location
   end
 
-  def test_place_next_to_opponent
+  def test_can_play_next_to_opponent_on_second_turn
     board = Board.load(@alice => {},
                        @bob   => {Base:[[0,0]]})
     @game.expect :turn, 1
@@ -31,6 +31,16 @@ class TestBase < HiveTestCase
     assert_equal [[0,2], [1,2], [2,1]], @insect.valid_placements
   end
 
+  def test_can_play_into_surrounded_space
+    board = Board.load(@alice => {Spider:Board.neighbors(0,0)},
+                       @bob => {})
+    @game.expect :turn, 2
+    @game.expect :board, board
+
+    assert_includes Insect::Spider.new(@alice).valid_placements, [0,0]
+    refute_includes Insect::Spider.new(@bob).valid_placements, [0,0]
+  end
+
   def test_valid_placements
     @game.expect :board, Board.load(@alice => {Base:[[0,0]]},
                                     @bob => {Base:[[1,0]]})
@@ -38,7 +48,7 @@ class TestBase < HiveTestCase
     assert_equal [[-1,0], [0,-1], [0,1]], @insect.valid_placements
   end
 
-  def test_invalid_placement
+  def test_cant_place_queen_first
     @game.expect :board, Board.load(@alice => {Base:[[0,0]]},
                                     @bob => {Base:[[1,0]]})
     @alice.insects << Insect::Queen.new(@alice)
@@ -49,6 +59,12 @@ class TestBase < HiveTestCase
       assert_match /queen/, e.message
       assert_match /first/, e.message
     end
+  end
+
+  def test_invalid_placement
+    @game.expect :board, Board.load(@alice => {Base:[[0,0]]},
+                                    @bob => {Base:[[1,0]]})
+    @alice.insects << Insect::Queen.new(@alice)
 
     @game.expect :turn, 6
     e = assert_raises(IllegalOperation) { @insect.move([0,1]) }

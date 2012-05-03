@@ -29,6 +29,15 @@ class TestBoard < HiveTestCase
                  Board.neighbors(0,1)
   end
 
+  def test_one_hive
+    board = Board.load(@alice => {Queen:[[0,0]], Ant:[[1,0]], Beetle:[[2,0]]},
+                       @bob   => {Ant:[[1,-1]], Queen:[[3,0]]})
+
+    assert Board.one_hive?(board.insects.map(&:location))
+    board.tiles.delete([1,0])
+    refute Board.one_hive?(board.insects.map(&:location))
+  end
+
   def test_assignment
     insect = MiniTest::Mock.new
     insect.expect :==, true, [insect]

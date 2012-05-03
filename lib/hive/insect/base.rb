@@ -16,32 +16,26 @@ module Hive
         @player = player
       end
 
-      def one_hive?
-        hive = Set[self]
-        queue = Set[self.neighbors[:insects].first]
-
-        until queue.empty?
-          insect = queue.first
-          queue.delete(insect)
-
-          neighbors = insect.neighbors[:insects].reject do |neighbor|
-            hive.include?(neighbor)
-          end
-
-          hive << insect
-          queue.merge(neighbors)
-        end
-
-        hive.length != self.board.insects.length
+      def validate_placement(location)
+        raise IllegalOperation, 'Queen must be played by the fourth turn' if self.game.turn / 2 == 3 and not self.player.queen.played? and not Queen === self
+        raise IllegalOperation, 'Invalid location' unless self.valid_placements.include?(location)
       end
 
       def valid_placements
-        return self.board.empty_spaces if self.game.turn == 1
+        spaces = self.board.empty_spaces.map(&:location)
 
-        self.board.empty_spaces.reject do |location|
+        return spaces if self.game.turn == 1
+
+        spaces.reject do |location|
           neighbors = self.board[*location].neighbors[:insects]
           neighbors.any? {|neighbor| neighbor.player != self.player }
         end
+      end
+
+      def validate_move(location)
+        raise IllegalOperation, 'Queen has not been played' unless self.player.queen.played?
+        raise IllegalOperation, 'Invalid location' unless self.valid_moves.include?(location)
+        raise IllegalOperation, 'Moving will break the hive' unless Board.one_hive?(self.board.insects.map(&:location).delete(location))
       end
 
       def valid_moves
@@ -52,14 +46,7 @@ module Hive
       end
 
       def move(location)
-        if self.played?
-          raise IllegalOperation, 'Queen has not been played' unless self.player.queen.played?
-          raise IllegalOperation, 'Invalid location' unless self.valid_moves.include?(location)
-        else
-          raise IllegalOperation, "Can't place queen with first move" if self.game.turn / 2 == 0 and Queen === self
-          raise IllegalOperation, 'Queen must be played by the fourth turn' if self.game.turn / 2 == 3 and not self.player.queen.played? and not Queen === self
-          raise IllegalOperation, 'Invalid location' unless self.valid_placements.include?(location)
-        end
+        self.send("validate_#{(self.played?) ? 'move' : 'placement'}".to_sym, location)
 
         # remove disconnected empty tiles
         spaces = self.neighbors[:spaces]
