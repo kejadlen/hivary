@@ -4,10 +4,20 @@ class TestTile < HiveTestCase
   def setup
     super
 
-    @tile = Tile.new([0,0])
+    @tile = Tile.new(nil)
+  end
+
+  def test_played
+    refute @tile.played?
+
+    @tile.location = [0,0]
+
+    assert @tile.played?
   end
 
   def test_neighbors
+    assert_equal({ spaces:[], insects:[] }, @tile.neighbors)
+
     board = Board.load(@alice => {Base:[[1,0], [1,-1], [1,1]]},
                        @bob => {Base:[[0,0]]})
     game = MiniTest::Mock.new

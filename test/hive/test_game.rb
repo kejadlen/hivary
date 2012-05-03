@@ -10,7 +10,7 @@ class TestGame < HiveTestCase
   def test_init
     assert_equal [], @game.players
     refute_nil @game.board
-    assert_equal nil, @game.turn
+    assert_nil @game.turn
   end
 
   def test_start
@@ -19,11 +19,13 @@ class TestGame < HiveTestCase
       player.expect :prepare_insects, nil
     end
 
+    assert_nil @game.turn
+
     @game.start!
 
     @game.players.each {|player| player.verify }
 
-    # TODO: test player randomization
+    # TODO: test player randomization?
 
     assert_equal 0, @game.turn
   end
@@ -44,5 +46,19 @@ class TestGame < HiveTestCase
     assert_equal 5, game.turn
     assert_equal 11, @alice.insects.length
     assert_equal 11, @bob.insects.length
+  end
+
+  def test_play_ALL_the_insects
+    [@alice, @bob].each {|player| player.join_game(@game) }
+    @game.start!
+
+    insects = @game.current_player.insects - [@game.current_player.queen]
+    until insects.empty?
+      insect = (not @game.current_player.queen.played? and (1..3).include?(@game.turn / 2)) ? @game.current_player.queen : insects.sample
+      @game.current_player.move(insect, insect.valid_placements.sample)
+      insects = @game.current_player.insects.reject {|insect| insect.played? } - [@game.current_player.queen]
+      # puts
+      # puts @game.board
+    end
   end
 end

@@ -45,19 +45,28 @@ class TestPlayer < HiveTestCase
   end
 
   def test_move
-    @game.expect :current_player, @alice
-    @game.expect :turn, 2
-    @game.expect :turn=, 3, [3]
+    players = [@alice, @bob]
     insect = MiniTest::Mock.new
+
+    @game.expect :current_player, @alice
+    @game.expect :players, players
+    @game.expect :turn, 2
     insect.expect :player, @alice
-    insect.expect :played?, false
-    insect.expect :send, nil, [:place, [0,0]]
+
+    @game.expect :turn=, 3, [3]
+    insect.expect :move, nil, [[0,0]]
     @alice.move(insect, [0,0])
+    assert_equal [@bob, @alice], players
+    @game.verify
     insect.verify
     
-    insect.expect :played?, true
-    insect.expect :send, nil, [:move, [1,0]]
+    @game.expect :turn, 3
+
+    @game.expect :turn=, 4, [4]
+    insect.expect :move, nil, [[1,0]]
     @alice.move(insect, [1,0])
+    assert_equal [@alice, @bob], players
+    @game.verify
     insect.verify
   end
 end

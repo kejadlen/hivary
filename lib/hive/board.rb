@@ -38,6 +38,7 @@ module Hive
 
     def []=(*location, tile)
       self.tiles[location] = tile
+      tile.location = location
 
       # Add empty tiles as necesssary
       Board.neighbors(*location).each do |neighbor|
@@ -45,8 +46,27 @@ module Hive
       end unless tile.empty_space?
     end
 
+    # def remove_empty_spaces!
+      # self.tiles.select {|_,tile| tile.empty_space? }.each do |location,space|
+        # self.tiles.delete(location) if space.neighbors[:insects].empty?
+      # end
+    # end
+
+    def can_slide?(a, b)
+      return false unless self[*b].empty_space?
+      return false unless Board.neighbors(*a).include?(b)
+
+      not (Board.neighbors(*a) & Board.neighbors(*b)).all? do |neighbor|
+        not self[*neighbor].empty_space? rescue false
+      end
+    end
+
     def empty_spaces
       self.tiles.select {|_,v| v.empty_space? }.map {|k,_| k }
+    end
+
+    def insects
+      self.tiles.reject {|_,v| v.empty_space? }.map {|k,_| k }
     end
 
     def to_s

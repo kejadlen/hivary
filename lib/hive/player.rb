@@ -34,9 +34,10 @@ module Hive
     def move(insect, location)
       self.validate_move(insect)
 
-      insect.send((insect.played?) ? :move : :place, location)
+      insect.move(location)
 
-      # change the current player (only if the other player can move)
+      # TODO: only change the current player if s/he can move
+      self.game.players << self.game.players.shift
 
       self.game.turn += 1
     end

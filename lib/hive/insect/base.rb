@@ -1,3 +1,5 @@
+require 'set'
+
 require_relative '../tile'
 
 module Hive
@@ -8,11 +10,29 @@ module Hive
       def board; self.player.board; end
       def empty_space?; false; end
       def game; self.player.game; end
-      def played?; !!self.location; end
 
       def initialize(player, location=nil)
         super(location)
         @player = player
+      end
+
+      def one_hive?
+        hive = Set[self]
+        queue = Set[self.neighbors[:insects].first]
+
+        until queue.empty?
+          insect = queue.first
+          queue.delete(insect)
+
+          neighbors = insect.neighbors[:insects].reject do |neighbor|
+            hive.include?(neighbor)
+          end
+
+          hive << insect
+          queue.merge(neighbors)
+        end
+
+        hive.length != self.board.insects.length
       end
 
       def valid_placements
@@ -33,14 +53,19 @@ module Hive
 
       def move(location)
         if self.played?
-          raise IllegalOperation, '' unless self.valid_moves.include?(location)
-          raise IllegalOperation, '' unless self.player.queen.played?
+          raise IllegalOperation, 'Queen has not been played' unless self.player.queen.played?
+          raise IllegalOperation, 'Invalid location' unless self.valid_moves.include?(location)
         else
-          raise IllegalOperation, '' unless self.valid_placements.include?(location)
-          raise IllegalOperation, '' if self.game.turn / 3 == 2 and not self.player.queen.played? and not Queen === self
+          raise IllegalOperation, "Can't place queen with first move" if self.game.turn / 2 == 0 and Queen === self
+          raise IllegalOperation, 'Queen must be played by the fourth turn' if self.game.turn / 2 == 3 and not self.player.queen.played? and not Queen === self
+          raise IllegalOperation, 'Invalid location' unless self.valid_placements.include?(location)
         end
 
-        self.location = location
+        # remove disconnected empty tiles
+        spaces = self.neighbors[:spaces]
+        spaces.select! {|space| space.neighbors[:insects] == [self] }
+        spaces.each {|space| self.board.tiles.delete(self.location) }
+
         self.board.tiles.delete(self)
         self.board[*location] = self
       end
