@@ -49,6 +49,18 @@ class TestGame < HiveTestCase
     assert_equal 11, @bob.insects.length
   end
 
+  def test_over
+    refute @game.over?
+
+    player = MiniTest::Mock.new
+    queen = MiniTest::Mock.new
+    queen.expect :surrounded?, true
+    player.expect :queen, queen
+    @game.turn = 0
+    @game.players << player
+    assert @game.over?
+  end
+
   def test_play_ALL_the_insects
     [@alice, @bob].each {|player| player.join_game(@game) }
     @game.start!

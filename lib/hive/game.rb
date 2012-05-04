@@ -61,5 +61,11 @@ module Hive
 
       self.turn = 0
     end
+
+    def over?
+      return false if self.turn.nil? # game hasn't even started!
+
+      @players.any? {|player| player.queen.surrounded? }
+    end
   end
 end
