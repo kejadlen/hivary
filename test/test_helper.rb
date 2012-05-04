@@ -12,6 +12,12 @@ class HiveTestCase < MiniTest::Unit::TestCase
   def setup
     @alice = Player.new('Alice')
     @bob = Player.new('Bob')
+    @players = [@alice, @bob]
+  end
+
+  def setup_game_mock
+    @game = MiniTest::Mock.new
+    @players.each {|player| player.game = @game }
   end
 end
 

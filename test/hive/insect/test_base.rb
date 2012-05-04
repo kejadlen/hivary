@@ -4,8 +4,7 @@ class TestBase < HiveTestCase
   def setup
     super
 
-    @game = MiniTest::Mock.new
-    [@alice, @bob].each {|player| player.game = @game }
+    self.setup_game_mock
 
     @insect = Insect::Base.new(@alice)
   end

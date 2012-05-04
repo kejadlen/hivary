@@ -4,6 +4,8 @@ class TestTile < HiveTestCase
   def setup
     super
 
+    self.setup_game_mock
+
     @tile = Tile.new(nil)
   end
 
@@ -20,9 +22,8 @@ class TestTile < HiveTestCase
 
     board = Board.load(@alice => {Base:[[1,0], [1,-1], [1,1]]},
                        @bob => {Base:[[0,0]]})
-    game = MiniTest::Mock.new
-    game.expect :board, board
-    @bob.game = game
+    @game.expect :board, board
+    @bob.game = @game
     neighbors = board[0,0].neighbors
 
     assert_equal 3, neighbors[:spaces].length

@@ -14,7 +14,7 @@ class TestGame < HiveTestCase
   end
 
   def test_start
-    @game.players = Array.new(2) { MiniTest::Mock.new }
+    2.times { @game.players << MiniTest::Mock.new }
     @game.players.each do |player|
       player.expect :prepare_insects, nil
     end
@@ -31,10 +31,11 @@ class TestGame < HiveTestCase
   end
 
   def test_current_player
-    @game.players = [@alice, @bob]
+    @game.players << @alice << @bob
     assert_equal @game.current_player, @alice
 
-    @game.players = [@bob, @alice]
+    @game.players.clear
+    @game.players << @bob << @alice
     assert_equal @game.current_player, @bob
   end
 

@@ -4,8 +4,7 @@ class TestPlayer < HiveTestCase
   def setup
     super
 
-    @game = MiniTest::Mock.new
-    @alice.game = @game
+    self.setup_game_mock
   end
 
   def test_init

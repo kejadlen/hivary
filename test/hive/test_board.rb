@@ -51,9 +51,8 @@ class TestBoard < HiveTestCase
   end
 
   def test_can_slide
-    game = MiniTest::Mock.new
-    game.expect :current_player, @alice
-    [@alice, @bob].each {|player| player.game = game }
+    self.setup_game_mock
+    @game.expect :current_player, @alice
     board = Board.load(@alice => { Spider:[[0,0]], Queen:[[2,1]] },
                        @bob   => { Spider:[[1,2]] })
 
@@ -61,20 +60,19 @@ class TestBoard < HiveTestCase
     assert board.can_slide?([1,1], [0,1])
   end
 
-  def test_remove_empty_spaces
-    skip 'Not sure if this method is necessary?'
-    game = MiniTest::Mock.new
-    game.expect :current_player, @alice
-    [@alice, @bob].each {|player| player.game = game }
-    board = Board.load(@alice => {Spider:[[0,0]]},
-                       @bob   => {})
-    board[-2,0] = EmptySpace.new(board, nil)
-    board.remove_empty_spaces!
+  # def test_remove_empty_spaces
+    # game = MiniTest::Mock.new
+    # game.expect :current_player, @alice
+    # [@alice, @bob].each {|player| player.game = game }
+    # board = Board.load(@alice => {Spider:[[0,0]]},
+                       # @bob   => {})
+    # board[-2,0] = EmptySpace.new(board, nil)
+    # board.remove_empty_spaces!
 
-    refute_nil board[-1,0]
-    refute_nil board[1,0]
-    assert_nil board[-2,0]
-  end
+    # refute_nil board[-1,0]
+    # refute_nil board[1,0]
+    # assert_nil board[-2,0]
+  # end
 
   def test_to_s
     alice = MiniTest::Mock.new

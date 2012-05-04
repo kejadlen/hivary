@@ -32,8 +32,8 @@ module Hive
       end
     end
 
-    attr_reader :board, :insects
-    attr_accessor :players, :turn
+    attr_reader :board, :insects, :players
+    attr_accessor :turn
 
     def current_player; self.players.first; end
 
