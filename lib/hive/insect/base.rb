@@ -34,13 +34,13 @@ module Hive
 
       def validate_move(location)
         raise IllegalOperation, 'Queen has not been played' unless self.player.queen.played?
+        raise IllegalOperation, 'Moving will break the hive' unless Board.one_hive?(self.board.insects.map(&:location) - [self.location])
         raise IllegalOperation, 'Invalid location' unless self.valid_moves.include?(location)
-        raise IllegalOperation, 'Moving will break the hive' unless Board.one_hive?(self.board.insects.map(&:location).delete(location))
       end
 
       def valid_moves
-        moves = self.neighbors[:spaces].reject do |neighbor|
-          neighbor.neighbors[:insects].uniq == [self]
+        moves = self.neighbors[:spaces].select do |neighbor|
+          neighbor.neighbors[:insects].uniq != [self] and self.board.can_slide?(self.location, neighbor.location)
         end
         moves.map(&:location)
       end
@@ -53,7 +53,7 @@ module Hive
         spaces.select! {|space| space.neighbors[:insects] == [self] }
         spaces.each {|space| self.board.tiles.delete(self.location) }
 
-        self.board.tiles.delete(self)
+        self.board.tiles.delete(self.location)
         self.board[*location] = self
       end
     end

@@ -69,4 +69,7 @@ class TestPlayer < HiveTestCase
     @game.verify
     insect.verify
   end
+
+  def test_skip_turn_with_no_moves
+  end
 end
