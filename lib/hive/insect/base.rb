@@ -51,9 +51,9 @@ module Hive
         # remove disconnected empty tiles
         spaces = self.neighbors[:spaces]
         spaces.select! {|space| space.neighbors[:insects] == [self] }
-        spaces.each {|space| self.board.tiles.delete(self.location) }
+        spaces.each {|space| self.board.delete(self) }
 
-        self.board.tiles.delete(self.location)
+        self.board.delete(self)
         self.board[*location] = self
       end
     end

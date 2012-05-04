@@ -52,10 +52,6 @@ module Hive
 
     def [](*location); self.tiles[location]; end
 
-    def initialize
-      @tiles = { [0,0] => EmptySpace.new(self, [0,0]) }
-    end
-
     def []=(*location, tile)
       self.tiles[location] = tile
       tile.location = location
@@ -64,6 +60,12 @@ module Hive
       Board.neighbors(*location).each do |neighbor|
         self[*neighbor] ||= EmptySpace.new(self, neighbor)
       end unless tile.empty_space?
+    end
+
+    def delete(tile); self.tiles.delete(tile.location) end
+
+    def initialize
+      @tiles = { [0,0] => EmptySpace.new(self, [0,0]) }
     end
 
     # def remove_empty_spaces!
