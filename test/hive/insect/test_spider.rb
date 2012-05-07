@@ -1,13 +1,10 @@
 require 'test_helper'
 
-class TestQueen < HiveTestCase
+class TestSpider < HiveTestCase
   def setup
     super
 
     self.setup_game_mock
-
-    @spider = Insect::Spider.new(@alice)
-    @alice.insects << @spider
   end
 
   def test_moves_three_spaces

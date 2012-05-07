@@ -23,7 +23,7 @@ module Hive
 
         self.board[*self.location] = self
 
-        moves.map {|move| move.last }.map(&:location).uniq.sort
+        moves.map {|move| move.last.location }.uniq.sort
       end
     end
   end
