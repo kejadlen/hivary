@@ -52,13 +52,13 @@ class TestQueen < HiveTestCase
     @game.expect :board, board
     @game.expect :turn, 2
 
-    ant = board[0,0]
+    base = board[0,0]
 
-    assert_raises(IllegalOperation) { ant.move([1,0]) }
+    assert_raises(IllegalOperation) { base.move([1,0]) }
 
     @queen.move([1,0])
 
-    ant.move([1,1])
+    base.move([1,1])
   end
 
   def test_moves_one_tile
