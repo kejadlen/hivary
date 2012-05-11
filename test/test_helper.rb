@@ -13,7 +13,7 @@ class MiniTest::Mock
 end
 
 class GameMock < MiniTest::Mock
-  attr_accessor :board, :players, :turn
+  attr_accessor :board, :current_player, :players, :turn
 end
 
 class HiveTestCase < MiniTest::Unit::TestCase

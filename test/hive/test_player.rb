@@ -17,10 +17,10 @@ class TestPlayer < HiveTestCase
   end
 
   def test_current_player
-    @game.expect :current_player, 0
+    @game.current_player = 0
     refute @alice.current_player?
 
-    @game.expect :current_player, @alice
+    @game.current_player = @alice
     assert @alice.current_player?
   end
 
@@ -54,7 +54,7 @@ class TestPlayer < HiveTestCase
     @game.players = players
     @game.turn = 2
 
-    @game.expect :current_player, @alice
+    @game.current_player = @alice
     insect.expect :move, nil, [[0,0]]
     insect.expect :player, @alice
     @alice.move(insect, [0,0])
@@ -63,7 +63,6 @@ class TestPlayer < HiveTestCase
     @game.verify
     insect.verify
     
-    @game.expect :current_player, @alice
     insect.expect :move, nil, [[1,0]]
     insect.expect :player, @alice
     @alice.move(insect, [1,0])
