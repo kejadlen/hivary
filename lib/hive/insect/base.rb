@@ -35,6 +35,7 @@ module Hive
 
       def validate_move(location)
         raise IllegalOperation, 'Queen has not been played' unless self.player.queen.played?
+        raise IllegalOperation, 'Under another piece' if self.board[*self.location] != self
         raise IllegalOperation, 'Moving will break the hive' if self.breaks_hive?
         raise IllegalOperation, 'Invalid location' unless self.valid_moves.include?(location)
       end

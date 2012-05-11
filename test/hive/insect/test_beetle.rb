@@ -50,6 +50,16 @@ class TestBeetle < HiveTestCase
   end
 
   def test_covered_insect_cant_move
+    board = Board.load(@alice => { Beetle:[[1,0]], Queen:[[0,1]], Base:[[1,1], [-1,0], [0,0], [0,-1]] },
+                       @bob => {})
+    @game.board = board
+
+    insect = board[0,0]
+    beetle = board[1,0]
+
+    beetle.move([0,0])
+
+    assert_raises(IllegalOperation) { insect.move([1,0]) }
   end
 
   def test_stack_multiple_beetles
