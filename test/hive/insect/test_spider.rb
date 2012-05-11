@@ -14,7 +14,7 @@ class TestSpider < HiveTestCase
                        @bob   => {Beetle:[[1,1]], Grasshopper:[[0,-2]],
                                   Ant:[[2,-2]], Queen:[[3,0]],
                                   Spider:[[3,1]]})
-    @game.expect :board, board
+    @game.board = board
 
     spider = board[2,2]
     spider.valid_moves.must_equal [[0,2], [1,-1], [2,-1], [4,0]]

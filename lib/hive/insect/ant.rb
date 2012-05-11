@@ -11,9 +11,7 @@ module Hive
         end
         extra_spaces.each {|space| self.board.delete(space) }
 
-        queue = Set[*self.neighbors[:spaces].select do |space|
-          self.board.can_slide?(self.location, space.location)
-        end]
+        queue = Set[*super.map {|location| self.board[*location] }]
         moves = Set.new
 
         until queue.empty?

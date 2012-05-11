@@ -1,8 +1,8 @@
 GIT
-  remote: git://github.com/kejadlen/minitest.git
-  revision: 86cdd42b768b39c5aed5482c2688c5917b2b94c2
+  remote: git://github.com/seattlerb/minitest.git
+  revision: ace442944e72fcfc609949a778ede380d00aa5f4
   specs:
-    minitest (2.0)
+    minitest (3.0)
 
 GEM
   remote: http://rubygems.org/
@@ -44,7 +44,7 @@ DEPENDENCIES
   guard
   guard-bundler
   guard-minitest
-  minitest (= 2.0)!
+  minitest (= 3.0)!
   pry
   pry-nav
   rb-readline

@@ -2,9 +2,19 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 
 require 'simplecov'; SimpleCov.start { command_name 'MiniTest' }
 
-require 'fivemat/minitest/autorun'
+# require 'fivemat/minitest/autorun'
+require 'minitest/autorun'
 
 require 'hive'
+
+# So we don't need to do mock.expect :hash everywhere.
+class MiniTest::Mock
+  def hash; super; end
+end
+
+class GameMock < MiniTest::Mock
+  attr_accessor :board, :players, :turn
+end
 
 class HiveTestCase < MiniTest::Unit::TestCase
   include Hive
@@ -16,12 +26,7 @@ class HiveTestCase < MiniTest::Unit::TestCase
   end
 
   def setup_game_mock
-    @game = MiniTest::Mock.new
+    @game = GameMock.new
     @players.each {|player| player.game = @game }
   end
-end
-
-# So we don't need to do mock.expect :hash everywhere.
-class MiniTest::Mock
-  def hash; super; end
 end

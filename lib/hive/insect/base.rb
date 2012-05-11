@@ -8,6 +8,7 @@ module Hive
       attr_accessor :player
 
       def board; self.player.board; end
+      def breaks_hive?; not Board.one_hive?(self.board.insects.map(&:location) - [self.location]); end
       def empty_space?; false; end
       def game; self.player.game; end
 
@@ -34,7 +35,7 @@ module Hive
 
       def validate_move(location)
         raise IllegalOperation, 'Queen has not been played' unless self.player.queen.played?
-        raise IllegalOperation, 'Moving will break the hive' unless Board.one_hive?(self.board.insects.map(&:location) - [self.location])
+        raise IllegalOperation, 'Moving will break the hive' if self.breaks_hive?
         raise IllegalOperation, 'Invalid location' unless self.valid_moves.include?(location)
       end
 

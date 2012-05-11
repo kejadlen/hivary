@@ -47,6 +47,8 @@ class TestBoard < HiveTestCase
 
     assert_equal insect, @board.tiles[[1,0]]
     assert_equal 7, @board.tiles.length
+
+    insect.expect :empty_space?, false
     assert_equal 6, @board.tiles.select {|_,tile| tile.empty_space? }.length
   end
 

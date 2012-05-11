@@ -22,7 +22,7 @@ class TestTile < HiveTestCase
 
     board = Board.load(@alice => {Base:[[1,0], [1,-1], [1,1]]},
                        @bob => {Base:[[0,0]]})
-    @game.expect :board, board
+    @game.board = board
     @bob.game = @game
     neighbors = board[0,0].neighbors
 

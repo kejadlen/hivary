@@ -14,7 +14,7 @@ class TestGrasshopper < HiveTestCase
                        @bob   => {Grasshopper:[[1,0]], Queen:[[0,1]],
                                   Ant:[[0,2]], Beetle:[[3,1]],
                                   Spider:[[4,1],[4,-1]]})
-    @game.expect :board, board
+    @game.board = board
 
     grasshopper = board[0,0]
     grasshopper.valid_moves.must_equal [[-1,2], [1,-2], [3,0]]

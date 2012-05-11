@@ -1,5 +1,9 @@
 require 'test_helper'
 
+# class MiniTest::Mock
+  # attr_reader :actual_calls, :expected_calls
+# end
+
 class TestPlayer < HiveTestCase
   def setup
     super
@@ -21,7 +25,7 @@ class TestPlayer < HiveTestCase
   end
 
   def test_join_game
-    @game.expect :players, []
+    @game.players = []
 
     @alice.join_game(@game)
 
@@ -47,24 +51,24 @@ class TestPlayer < HiveTestCase
     players = [@alice, @bob]
     insect = MiniTest::Mock.new
 
-    @game.expect :current_player, @alice
-    @game.expect :players, players
-    @game.expect :turn, 2
-    insect.expect :player, @alice
+    @game.players = players
+    @game.turn = 2
 
-    @game.expect :turn=, 3, [3]
+    @game.expect :current_player, @alice
     insect.expect :move, nil, [[0,0]]
+    insect.expect :player, @alice
     @alice.move(insect, [0,0])
     assert_equal [@bob, @alice], players
+    assert_equal 3, @game.turn
     @game.verify
     insect.verify
     
-    @game.expect :turn, 3
-
-    @game.expect :turn=, 4, [4]
+    @game.expect :current_player, @alice
     insect.expect :move, nil, [[1,0]]
+    insect.expect :player, @alice
     @alice.move(insect, [1,0])
     assert_equal [@alice, @bob], players
+    assert_equal 4, @game.turn
     @game.verify
     insect.verify
   end

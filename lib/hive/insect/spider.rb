@@ -8,7 +8,9 @@ module Hive
         self.board.delete(self)
 
         neighbors = self.neighbors
-        moves = neighbors[:spaces] & neighbors[:insects].map {|insect| insect.neighbors[:spaces] }.flatten
+        moves = super.map {|location| self.board[*location] }
+        moves &= neighbors[:insects].map {|insect| insect.neighbors[:spaces] }.flatten
+        moves.select! {|move| self.board.can_slide?(self.location, move.location) }
         moves.map! {|move| [move] }
 
         until moves.first.length == 3
