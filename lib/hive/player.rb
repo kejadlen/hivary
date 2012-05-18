@@ -1,4 +1,10 @@
+require_relative 'hive'
+
 module Hive
+  class GameNotStarted < HiveError; end
+  class InvalidInsect < HiveError; end
+  class InvalidTurn < HiveError; end
+
   class Player
     attr_accessor :game
     attr_reader :name, :insects
@@ -25,14 +31,15 @@ module Hive
       end
     end
 
-    def validate_move(insect)
-      raise IllegalOperation, 'Game has not started' if self.game.turn.nil?
-      raise IllegalOperation, '' if insect.player != self
-      raise IllegalOperation, "Not #{player}'s turn" unless self.current_player?
+    def validate_move
+      raise GameNotStarted if self.game.turn.nil?
+      raise InvalidTurn unless self.current_player?
     end
 
     def move(insect, location)
-      self.validate_move(insect)
+      raise InvalidInsect if insect.player != self
+
+      self.validate_move
 
       insect.move(location)
 
