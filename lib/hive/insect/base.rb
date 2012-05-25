@@ -1,8 +1,12 @@
 require 'set'
 
+require_relative '../hive'
 require_relative '../tile'
 
 module Hive
+  class InvalidLocation < HiveError; end
+  class QueenNotPlayed < HiveError; end
+
   module Insect
     class Base < Tile
       attr_accessor :player
@@ -17,9 +21,9 @@ module Hive
         @player = player
       end
 
-      def validate_placement(location)
-        raise IllegalOperation, 'Queen must be played by the fourth turn' if self.game.turn / 2 == 3 and not self.player.queen.played? and not Queen === self
-        raise IllegalOperation, 'Invalid location' unless self.valid_placements.include?(location)
+      def validate_placement
+        raise InvalidInsect if self.played?
+        raise QueenNotPlayed if self.game.turn / 2 == 3 and not self.player.queen.played? and not Queen === self
       end
 
       def valid_placements
@@ -33,11 +37,19 @@ module Hive
         end
       end
 
-      def validate_move(location)
-        raise IllegalOperation, 'Queen has not been played' unless self.player.queen.played?
-        raise IllegalOperation, 'Under another piece' if self.board[*self.location] != self
+      def play(location)
+        self.player.validate_action
+        self.validate_placement
+        raise InvalidLocation unless self.valid_placements.include?(location)
+
+        self.board[*location] = self
+      end
+      
+      def validate_move
+        raise InvalidInsect unless self.played?
+        raise QueenNotPlayed unless self.player.queen.played?
+        raise IllegalOperation, 'Under another piece' unless self.board.insects.include?(self)
         raise IllegalOperation, 'Moving will break the hive' if self.breaks_hive?
-        raise IllegalOperation, 'Invalid location' unless self.valid_moves.include?(location)
       end
 
       def valid_moves
@@ -48,7 +60,9 @@ module Hive
       end
 
       def move(location)
-        self.send("validate_#{(self.played?) ? 'move' : 'placement'}".to_sym, location)
+        self.player.validate_action
+        self.validate_move
+        raise InvalidLocation, 'Invalid location' unless self.valid_moves.include?(location)
 
         # remove disconnected empty tiles
         spaces = self.neighbors[:spaces]

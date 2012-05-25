@@ -47,33 +47,17 @@ class TestBase < HiveTestCase
     assert_equal [[-1,0], [0,-1], [0,1]], @insect.valid_placements
   end
 
-  def test_cant_place_queen_first
-    @game.board = Board.load(@alice => {Base:[[0,0]]},
-                             @bob => {Base:[[1,0]]})
-    @alice.insects << Insect::Queen.new(@alice)
-
-    (0..1).each do |turn|
-      @game.turn = turn
-      e = assert_raises(IllegalOperation) { @alice.queen.move([0,1]) }
-      assert_match /queen/, e.message
-      assert_match /first/, e.message
-    end
-  end
-
   def test_invalid_placement
     @game.board = Board.load(@alice => {Base:[[0,0]]},
                              @bob => {Base:[[1,0]]})
+    @game.current_player = @alice
     @alice.insects << Insect::Queen.new(@alice)
 
     @game.turn = 6
-    e = assert_raises(IllegalOperation) { @insect.move([0,1]) }
-    assert_match /queen/i, e.message
-    assert_match /four/, e.message
-    assert_match /turn/, e.message
+    assert_raises(QueenNotPlayed) { @insect.play([0,1]) }
 
     @game.turn = 2
-    e = assert_raises(IllegalOperation) { @insect.move([2,0]) }
-    assert_match /invalid location/i, e.message
+    assert_raises(InvalidLocation) { @insect.play([2,0]) }
   end
 
   def test_valid_moves
@@ -89,16 +73,17 @@ class TestBase < HiveTestCase
     board = Board.load(@alice => {Base:[[0,0]]},
                        @bob => {Base:[[1,0]]})
     @game.board = board
+    @game.current_player = @alice
+    @game.turn = 0
     @alice.insects << Insect::Queen.new(@alice)
 
+    @game.expect :started?, true
     assert board[0,0].played?
-    e = assert_raises(IllegalOperation) { board[0,0].move([1,1]) }
-    assert_match /queen/i, e.message
-    assert_match /played/, e.message
+    e = assert_raises(QueenNotPlayed) { board[0,0].move([1,1]) }
 
+    @game.expect :started?, true
     board[2,0] = @alice.queen
-    e = assert_raises(IllegalOperation) { board[0,0].move([2,2]) }
-    assert_match /invalid location/i, e.message
+    assert_raises(InvalidLocation) { board[0,0].move([2,2]) }
   end
 
   def test_cant_move_even_if_hive_is_relinked
@@ -107,9 +92,7 @@ class TestBase < HiveTestCase
     @game.expect :current_player, @alice
     @game.board = board
 
-    e = assert_raises(IllegalOperation) { @alice.queen.validate_move([1,-2]) }
-    assert_match /break/, e.message
-    assert_match /hive/, e.message
+    assert_raises(IllegalOperation) { @alice.queen.validate_move }
   end
 
   def test_freedom_to_move_in
@@ -119,9 +102,11 @@ class TestBase < HiveTestCase
     board = Board.load(@alice => {Queen:[[0,0]], Ant:[[1,0]]},
                        @bob   => {Beetle:[[1,1]], Queen:[[2,1]], Spider:[[2,0]], Ant:[[1,-1]]})
     @game.board = board
+    @game.current_player = @alice
+    @game.turn = 0
 
     ant = board[1,0]
-    e = assert_raises(IllegalOperation) { ant.validate_move([2,-1]) }
+    assert_raises(InvalidLocation) { ant.move([2,-1]) }
 
     board[1,-1] = EmptySpace.new(board, [1,-1])
     ant.move([2,-1])
@@ -130,12 +115,13 @@ class TestBase < HiveTestCase
     assert_equal ant, board[2,-1]
   end
 
-  def test_move
-    board = Board.load(@alice => {Base:[[0,0]]},
-                       @bob => {Base:[[1,0]]})
+  def test_play
+    board = Board.load(@alice => { Base:[[0,0]] },
+                       @bob =>  { Base:[[1,0]] })
     @game.board = board
+    @game.current_player = @alice
     @game.turn = 2
-    @insect.move([0,-1])
+    @insect.play([0,-1])
     assert_equal @insect, board[0,-1]
   end
 end

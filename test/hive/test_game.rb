@@ -68,7 +68,7 @@ class TestGame < HiveTestCase
     insects = @game.current_player.insects - [@game.current_player.queen]
     until insects.empty?
       insect = (not @game.current_player.queen.played? and (1..3).include?(@game.turn / 2)) ? @game.current_player.queen : insects.sample
-      @game.current_player.move(insect, insect.valid_placements.sample)
+      insect.play(insect.valid_placements.sample)
       insects = @game.current_player.insects.reject {|insect| insect.played? } - [@game.current_player.queen]
       # puts
       # puts @game.board

@@ -29,6 +29,8 @@ class TestBeetle < HiveTestCase
     board = Board.load(@alice => { Beetle:[[1,0]], Queen:[[1,-2]], Grasshopper:[[2,-2]] },
                        @bob   => { Queen:[[-1,0]], Spider:[[0,0]], Ant:[[1,-1]] })
     @game.board = board
+    @game.current_player = @alice
+    @game.turn = 0
 
     beetle = board[1,0]
     ant = board[1,-1]
@@ -53,6 +55,8 @@ class TestBeetle < HiveTestCase
     board = Board.load(@alice => { Beetle:[[1,0]], Queen:[[0,1]], Base:[[1,1], [-1,0], [0,0], [0,-1]] },
                        @bob => {})
     @game.board = board
+    @game.current_player = @alice
+    @game.turn = 0
 
     insect = board[0,0]
     beetle = board[1,0]

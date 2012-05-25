@@ -31,22 +31,24 @@ module Hive
       end
     end
 
-    def validate_move
+    def validate_action
       raise GameNotStarted if self.game.turn.nil?
       raise InvalidTurn unless self.current_player?
+      # raise GameOver if self.game.over?
     end
 
-    def move(insect, location)
-      raise InvalidInsect if insect.player != self
+    # def move(insect, location)
+      # self.validate_action
 
-      self.validate_move
+      # raise InvalidInsect if insect.player != self
+      # raise InvalidInsect unless insect.played?
 
-      insect.move(location)
+      # insect.move(location)
 
-      # TODO: only change the current player if s/he can move
-      self.game.players << self.game.players.shift
+      # # TODO: only change the current player if s/he can move
+      # self.game.players << self.game.players.shift
 
-      self.game.turn += 1
-    end
+      # self.game.turn += 1
+    # end
   end
 end

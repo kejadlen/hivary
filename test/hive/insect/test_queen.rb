@@ -11,21 +11,24 @@ class TestQueen < HiveTestCase
   end
 
   def test_cant_place_first
+    @game.current_player = @alice
+
     (0..1).each do |turn|
       @game.turn = turn
-      assert_raises(IllegalOperation) { @queen.move([0,0]) }
+      assert_raises(IllegalOperation) { @queen.play([0,0]) }
     end
   end
 
   def test_can_play_on_turns_2_and_3
     board = Board.new
     @game.board = board
+    @game.current_player = @alice
 
     (2..5).each do |turn|
       @game.turn = turn
 
       insect = Insect::Base.new(@alice)
-      insect.move(insect.valid_placements.sample)
+      insect.play(insect.valid_placements.sample)
 
       refute_empty @queen.valid_placements
     end
@@ -34,13 +37,14 @@ class TestQueen < HiveTestCase
   def test_must_be_played_by_turn_4
     board = Board.new
     @game.board = board
+    @game.current_player = @alice
 
     insect = Insect::Base.new(@alice)
 
     (6..7).each do |turn|
       @game.turn = turn
 
-      assert_raises(IllegalOperation) { insect.move(insect.valid_placements.sample) }
+      assert_raises(QueenNotPlayed) { insect.play(insect.valid_placements.sample) }
 
       refute_empty @queen.valid_placements
     end
@@ -50,13 +54,14 @@ class TestQueen < HiveTestCase
     board = Board.load(@alice => {Base:[[0,0]]},
                        @bob => {})
     @game.board = board
+    @game.current_player = @alice
     @game.turn = 2
 
     base = board[0,0]
 
-    assert_raises(IllegalOperation) { base.move([1,0]) }
+    assert_raises(QueenNotPlayed) { base.move([1,0]) }
 
-    @queen.move([1,0])
+    @queen.play([1,0])
 
     base.move([1,1])
   end

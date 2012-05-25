@@ -36,6 +36,7 @@ module Hive
     attr_accessor :turn
 
     def current_player; self.players.first; end
+    # def started?; not self.turn.nil?; end
 
     def initialize(players=[], board=nil, turn=nil, expansions=[])
       @insects = StartInsects.dup

@@ -43,44 +43,41 @@ class TestPlayer < HiveTestCase
                  @alice.insects.map(&:class)
   end
 
-  def test_validate_move
-    insect = Insect::Base.new(@bob)
-    assert_raises(InvalidInsect) { @alice.move(insect, [0,0]) }
-
+  def test_validate_action
     @game.players = []
     @alice.join_game(@game)
 
-    assert_raises(GameNotStarted) { @alice.validate_move }
+    assert_raises(GameNotStarted) { @alice.validate_action }
 
     @game.turn = 0
     @game.players = [@bob, @alice]
 
-    assert_raises(InvalidTurn) { @alice.validate_move }
+    assert_raises(InvalidTurn) { @alice.validate_action }
   end
 
-  def test_move
-    insect = MiniTest::Mock.new
+  # def test_move
+    # insect = MiniTest::Mock.new
 
-    @game.players = @players
-    @game.turn = 2
+    # @game.players = @players
+    # @game.turn = 2
 
-    @game.current_player = @alice
-    insect.expect :move, nil, [[0,0]]
-    insect.expect :player, @alice
-    @alice.move(insect, [0,0])
-    assert_equal [@bob, @alice], @players
-    assert_equal 3, @game.turn
-    @game.verify
-    insect.verify
+    # @game.current_player = @alice
+    # insect.expect :move, nil, [[0,0]]
+    # insect.expect :player, @alice
+    # @alice.move(insect, [0,0])
+    # assert_equal [@bob, @alice], @players
+    # assert_equal 3, @game.turn
+    # @game.verify
+    # insect.verify
     
-    insect.expect :move, nil, [[1,0]]
-    insect.expect :player, @alice
-    @alice.move(insect, [1,0])
-    assert_equal [@alice, @bob], @players
-    assert_equal 4, @game.turn
-    @game.verify
-    insect.verify
-  end
+    # insect.expect :move, nil, [[1,0]]
+    # insect.expect :player, @alice
+    # @alice.move(insect, [1,0])
+    # assert_equal [@alice, @bob], @players
+    # assert_equal 4, @game.turn
+    # @game.verify
+    # insect.verify
+  # end
 
   def test_skip_turn_with_no_moves
   end
