@@ -6,8 +6,11 @@ module Hive
   class Stack < Delegator
     def __getobj__; @source; end
 
-    def initialize(*args)
+    attr_accessor :location
+
+    def initialize(location=nil, *args)
       @source = args
+      @location = location
     end
 
     def top; @source.last; end

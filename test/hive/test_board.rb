@@ -39,9 +39,12 @@ class TestBoard < HiveTestCase
   end
 
   def test_assignment
+    stack = Stack.new([1,0])
+    @board.source[[1,0]] = stack
+
     insect = MiniTest::Mock.new
     insect.expect :==, true, [insect]
-    insect.expect :location=, [1,0], [[1,0]]
+    insect.expect :stack=, nil, [stack]
     @board[1,0] = insect
 
     assert_equal insect, @board[1,0]

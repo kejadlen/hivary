@@ -55,19 +55,19 @@ module Hive
 
     def [](*location); self.source[location].top; end
 
-    def []=(*location, tile)
-      self.source[location] ||= Stack.new
-      self.source[location] << tile
-      tile.location = location
+    def []=(*location, insect)
+      self.source[location] ||= Stack.new(location)
+      self.source[location] << insect
+      insect.stack = self.source[location]
 
       # Add empty stacks as necesssary
       Board.neighbors(*location).each do |neighbor|
-        self.source[neighbor] ||= Stack.new
+        self.source[neighbor] ||= Stack.new(neighbor)
       end
     end
 
     def initialize
-      @source = { [0,0] => Stack.new }
+      @source = { [0,0] => Stack.new([0,0]) }
     end
 
     # def remove_empty_spaces!

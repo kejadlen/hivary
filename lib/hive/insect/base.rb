@@ -7,15 +7,16 @@ module Hive
 
   module Insect
     class Base
-      attr_accessor :player, :location
+      attr_accessor :player, :stack
 
       def board; self.player.board; end
       def breaks_hive?; not Board.one_hive?(self.board.insects.map(&:location) - [self.location]); end
       def game; self.player.game; end
-      def played?; !!self.location; end
+      def location; self.stack.location rescue nil; end
+      def played?; !!self.stack; end
 
-      def initialize(player, location=nil)
-        @location = location
+      def initialize(player, stack=nil)
+        @stack = stack
         @player = player
       end
 
