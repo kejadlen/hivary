@@ -1,21 +1,23 @@
 require_relative 'base'
 
-require_relative 'climber'
-
 module Hive
   module Insect
     class Beetle < Base
-      include Climber
+      def validate_move
+        super
+      rescue OneHiveError
+        raise unless self.on_top?
+      end
 
       def valid_moves
-        return super if self.on_top?
+        return Board.neighbors(*self.location) if self.on_top?
 
         neighbors = self.neighbors
         spaces = neighbors[:spaces].select do |space|
-          self.board.can_slide?(*[self, space].map(&:location)) and
-            space.neighbors[:insects] != [self]
+          self.board.can_slide?(self.location, space) and
+            self.board.neighbors(*space)[:insects] != [self]
         end
-        spaces.map(&:location) + neighbors[:insects].map(&:location)
+        spaces + neighbors[:insects].map(&:location)
       end
     end
   end

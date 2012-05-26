@@ -31,7 +31,7 @@ class TestBase < HiveTestCase
   end
 
   def test_can_play_into_surrounded_space
-    board = Board.load(@alice => {Spider:Board.neighbors(0,0)},
+    board = Board.load(@alice => { Spider:Board.neighbors(0,0) },
                        @bob => {})
     @game.turn = 2
     @game.board = board
@@ -92,7 +92,7 @@ class TestBase < HiveTestCase
     @game.expect :current_player, @alice
     @game.board = board
 
-    assert_raises(IllegalOperation) { @alice.queen.validate_move }
+    assert_raises(OneHiveError) { @alice.queen.validate_move }
   end
 
   def test_freedom_to_move_in
@@ -108,10 +108,10 @@ class TestBase < HiveTestCase
     ant = board[1,0]
     assert_raises(InvalidLocation) { ant.move([2,-1]) }
 
-    board[1,-1] = EmptySpace.new(board, [1,-1])
+    board.source[[1,-1]] = Stack.new
     ant.move([2,-1])
 
-    assert board[1,0].empty_space?
+    assert board[1,0].nil?
     assert_equal ant, board[2,-1]
   end
 

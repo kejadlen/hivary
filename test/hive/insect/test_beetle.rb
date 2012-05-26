@@ -13,7 +13,10 @@ class TestBeetle < HiveTestCase
     @game.board = board
 
     beetle = board[0,0]
-    beetle.valid_moves.wont_include [1,1]
+    refute_includes beetle.valid_moves, [1,1]
+  end
+
+  def test_one_hive
   end
 
   def test_can_climb_onto_hive
@@ -22,7 +25,7 @@ class TestBeetle < HiveTestCase
     @game.board = board
 
     beetle = board[1,0]
-    beetle.valid_moves.sort.must_equal [[0,0], [1,-1], [1,1], [2,-1]]
+    assert_equal [[0,0], [1,-1], [1,1], [2,-1]], beetle.valid_moves.sort
   end
 
   def test_covers_insects
@@ -36,19 +39,19 @@ class TestBeetle < HiveTestCase
     ant = board[1,-1]
 
     beetle.move([1,-1])
-
-    beetle.stack.must_equal ant
+    
+    assert_equal [ant, beetle], board.source[[1,-1]]
 
     @game.expect :turn, 3
 
     # The stack is the color of the beetle
-    Insect::Spider.new(@alice).valid_placements.must_include [2,-1]
+    assert_includes Insect::Spider.new(@alice).valid_placements, [2,-1]
 
     # Moving the beetle should uncover the ant
     spider = board[0,0]
     beetle.move([0,0])
-    beetle.stack.must_equal spider
-    board[1,-1].must_equal ant
+    assert_equal [spider, beetle], board.source[[0,0]]
+    assert_equal ant, board[1,-1]
   end
 
   def test_covered_insect_cant_move

@@ -1,24 +1,31 @@
-require 'set'
-
 require_relative '../hive'
-require_relative '../tile'
 
 module Hive
   class InvalidLocation < HiveError; end
   class QueenNotPlayed < HiveError; end
+  class OneHiveError < HiveError; end
 
   module Insect
-    class Base < Tile
-      attr_accessor :player
+    class Base
+      attr_accessor :player, :location
 
       def board; self.player.board; end
       def breaks_hive?; not Board.one_hive?(self.board.insects.map(&:location) - [self.location]); end
-      def empty_space?; false; end
       def game; self.player.game; end
+      def played?; !!self.location; end
 
       def initialize(player, location=nil)
-        super(location)
+        @location = location
         @player = player
+      end
+
+      def to_s; "<#{self.class.to_s.split('::').last}#{self.location}>"; end
+
+      def neighbors; self.board.neighbors(*self.location); end
+
+      def on_top?
+        stack = self.board.source[self.location]
+        stack.top == self and stack.size > 1
       end
 
       def validate_placement
@@ -27,12 +34,13 @@ module Hive
       end
 
       def valid_placements
-        spaces = self.board.empty_spaces.map(&:location)
+        spaces = self.board.empty_spaces
 
         return spaces if self.game.turn == 1
 
         spaces.reject do |location|
-          neighbors = self.board[*location].neighbors[:insects]
+          neighbors = Board.neighbors(*location).map {|neighbor| self.board[*neighbor] rescue nil }.compact
+          # neighbors = self.board[*location].neighbors[:insects]
           neighbors.any? {|neighbor| neighbor.player != self.player }
         end
       end
@@ -49,14 +57,14 @@ module Hive
         raise InvalidInsect unless self.played?
         raise QueenNotPlayed unless self.player.queen.played?
         raise IllegalOperation, 'Under another piece' unless self.board.insects.include?(self)
-        raise IllegalOperation, 'Moving will break the hive' if self.breaks_hive?
+        raise OneHiveError if self.breaks_hive?
       end
 
       def valid_moves
-        moves = self.neighbors[:spaces].select do |neighbor|
-          neighbor.neighbors[:insects].uniq != [self] and self.board.can_slide?(self.location, neighbor.location)
+        self.neighbors[:spaces].select do |space|
+          self.board.neighbors(*space)[:insects].uniq != [self] and
+            self.board.can_slide?(self.location, space)
         end
-        moves.map(&:location)
       end
 
       def move(location)
@@ -64,13 +72,10 @@ module Hive
         self.validate_move
         raise InvalidLocation, 'Invalid location' unless self.valid_moves.include?(location)
 
-        # remove disconnected empty tiles
-        spaces = self.neighbors[:spaces]
-        spaces.select! {|space| space.neighbors[:insects] == [self] }
-        spaces.each {|space| self.board.delete(self) }
-
         self.board.delete(self)
         self.board[*location] = self
+
+        # TODO: remove extraneous empty tiles
       end
     end
   end

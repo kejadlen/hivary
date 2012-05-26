@@ -1,14 +1,19 @@
-require_relative 'tile'
+require 'delegate'
+
+require_relative 'stack'
 require_relative 'insect/all'
 
 module Hive
-  class Board
+  class Board < Delegator
+    attr_reader :source
+    def __getobj__; @source; end
+
     class << self
       NEIGHBORS = [[1,0], [-1,0], [0,1], [0,-1]]
 
       def load(data)
         board = self.new
-        board.tiles.delete([0,0])
+        board.source.delete([0,0]) # remove the initial empty space
 
         data.each do |player,insects|
           insects.each do |klass,locations|
@@ -48,59 +53,67 @@ module Hive
       end
     end
 
-    attr_reader :tiles
-
-    def [](*location); self.tiles[location]; end
+    def [](*location); self.source[location].top; end
 
     def []=(*location, tile)
-      self.tiles[location] = tile
+      self.source[location] ||= Stack.new
+      self.source[location] << tile
       tile.location = location
 
-      # Add empty tiles as necesssary
+      # Add empty stacks as necesssary
       Board.neighbors(*location).each do |neighbor|
-        self[*neighbor] ||= EmptySpace.new(self, neighbor)
-      end unless tile.empty_space?
+        self.source[neighbor] ||= Stack.new
+      end
     end
 
-    def delete(tile); self.tiles.delete(tile.location) end
-
     def initialize
-      @tiles = { [0,0] => EmptySpace.new(self, [0,0]) }
+      @source = { [0,0] => Stack.new }
     end
 
     # def remove_empty_spaces!
-      # self.tiles.select {|_,tile| tile.empty_space? }.each do |location,space|
-        # self.tiles.delete(location) if space.neighbors[:insects].empty?
+      # self.source.select {|_,tile| tile.empty_space? }.each do |location,space|
+        # self.source.delete(location) if space.neighbors[:insects].empty?
       # end
     # end
 
     def can_slide?(a, b)
-      return false unless self[*b].empty_space?
+      return false unless self.source[b].empty?
       return false unless Board.neighbors(*a).include?(b)
 
       not (Board.neighbors(*a) & Board.neighbors(*b)).all? do |neighbor|
-        not self[*neighbor].empty_space? rescue false
+        not self.source[neighbor].empty? rescue false
       end
     end
 
-    def empty_spaces
-      self.tiles.select {|_,v| v.empty_space? }.map {|_,v| v }
+    def delete(insect)
+      stack = self.source[insect.location]
+      stack.delete(insect)
+      self.source.delete(insect.location) if stack.empty?
     end
 
-    def insects
-      self.tiles.reject {|_,v| v.empty_space? }.map {|_,v| v }
+    def empty_spaces; self.select {|_,v| v.empty? }.map {|k,_| k }; end
+    def insects; self.reject {|_,v| v.empty? }.map {|_,v| v.top }; end
+
+    def neighbors(*location)
+      neighbors = Board.neighbors(*location).map do |location|
+        [location, self.source[location]]
+      end
+      spaces,insects = neighbors.select {|_,stack| stack }.partition {|_,stack| stack.empty? }
+      { spaces:spaces.map {|k,_| k }, insects:insects.map {|_,v| v.top } }
     end
 
     def to_s
       min_x = 0 # so each row can be offset correctly
-      rows = Hash.new {|h,k| h[k] = Hash.new } # remapping the tiles to be indexed by coordinates
+      rows = Hash.new {|h,k| h[k] = Hash.new } # remapping the source to be indexed by coordinates
 
       # Get a row-by-row hash of the board, storing each tile as a colored letter
-      self.tiles.each do |location,tile|
+      self.source.each do |location,stack|
+        insect = stack.top
         min_x = [min_x, location[0]].min
 
-        color = (tile.empty_space?) ? 37 : (tile.player.current_player?) ? 32 : 31
-        rows[location[1]][location[0]] = "\e[#{color}m#{tile.class.to_s.split('::').last[0]}\e[0m"
+        color = (insect.nil?) ? 37 : (insect.player.current_player?) ? 32 : 31
+        letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0]
+        rows[location[1]][location[0]] = "\e[#{color}m#{letter}\e[0m"
       end
 
       # Transform the hash into the output string

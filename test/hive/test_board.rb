@@ -8,8 +8,8 @@ class TestBoard < HiveTestCase
   end
 
   def test_init
-    assert_equal 1, @board.tiles.length
-    assert_equal EmptySpace, @board[0,0].class
+    assert_equal 1, @board.length
+    assert_nil @board[0,0]
   end
 
   def test_load
@@ -18,7 +18,7 @@ class TestBoard < HiveTestCase
 
     assert_equal Insect::Spider, board[0,0].class
     assert_equal Insect::Ant, board[0,1].class
-    assert_equal 10, board.tiles.length
+    assert_equal 10, board.length
     assert_equal [Insect::Spider], @alice.insects.map(&:class)
   end
 
@@ -34,27 +34,25 @@ class TestBoard < HiveTestCase
                        @bob   => {Ant:[[1,-1]], Queen:[[3,0]]})
 
     assert Board.one_hive?(board.insects.map(&:location))
-    board.tiles.delete([1,0])
+    board.delete(board[1,0])
     refute Board.one_hive?(board.insects.map(&:location))
   end
 
   def test_assignment
     insect = MiniTest::Mock.new
     insect.expect :==, true, [insect]
-    insect.expect :empty_space?, false
     insect.expect :location=, [1,0], [[1,0]]
     @board[1,0] = insect
 
-    assert_equal insect, @board.tiles[[1,0]]
-    assert_equal 7, @board.tiles.length
-
-    insect.expect :empty_space?, false
-    assert_equal 6, @board.tiles.select {|_,tile| tile.empty_space? }.length
+    assert_equal insect, @board[1,0]
+    assert_equal 7, @board.length
+    assert_equal 6, @board.select {|_,stack| stack.empty? }.length
   end
 
   def test_can_slide
     self.setup_game_mock
-    @game.expect :current_player, @alice
+    # @game.expect :current_player, @alice
+    # p @alice.current_player?
     board = Board.load(@alice => { Spider:[[0,0]], Queen:[[2,1]] },
                        @bob   => { Spider:[[1,2]] })
 
@@ -75,6 +73,17 @@ class TestBoard < HiveTestCase
     # refute_nil board[1,0]
     # assert_nil board[-2,0]
   # end
+
+  def test_neighbors
+    board = Board.load(@alice => {Base:[[1,0], [1,-1], [1,1]]},
+                       @bob => {Base:[[0,0]]})
+    neighbors = board.neighbors(0,0)
+
+    assert_equal 3, neighbors[:spaces].length
+    assert_equal [[-1,0], [0,-1], [0,1]], neighbors[:spaces]
+    assert_equal 3, neighbors[:insects].length
+    assert_equal [[1,-1], [1,0], [1,1]], neighbors[:insects].map(&:location)
+  end
 
   def test_to_s
     alice = MiniTest::Mock.new

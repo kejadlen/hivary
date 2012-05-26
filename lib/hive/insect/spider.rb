@@ -7,25 +7,24 @@ module Hive
         # Remove the spider from the board for freedom of movement calculations
         self.board.delete(self)
 
-        neighbors = self.neighbors
-        moves = super.map {|location| self.board[*location] }
-        moves &= neighbors[:insects].map {|insect| insect.neighbors[:spaces] }.flatten
-        moves.select! {|move| self.board.can_slide?(self.location, move.location) }
+        moves = super
+        moves &= self.neighbors[:insects].inject([]) {|ary,insect| ary + insect.neighbors[:spaces] }
+        moves.select! {|move| self.board.can_slide?(self.location, move) }
         moves.map! {|move| [move] }
 
         until moves.first.length == 3
           move = moves.shift
 
-          neighbors = move.last.neighbors
-          (neighbors[:spaces] & neighbors[:insects].map {|insect| insect.neighbors[:spaces] }.flatten).each do |space|
-            next unless self.board.can_slide?(move.last.location, space.location)
+          neighbors = self.board.neighbors(*move.last)
+          (neighbors[:spaces] & neighbors[:insects].inject([]) {|ary,insect| ary + insect.neighbors[:spaces] }).each do |space|
+            next unless self.board.can_slide?(move.last, space)
             moves << (move.dup << space) unless space == move.first # can't backtrack
           end
         end
 
         self.board[*self.location] = self
 
-        moves.map {|move| move.last.location }.uniq.sort
+        moves.map(&:last).uniq.sort
       end
     end
   end
