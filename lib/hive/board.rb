@@ -70,12 +70,6 @@ module Hive
       @source = { [0,0] => Stack.new(0,0) }
     end
 
-    # def remove_empty_spaces!
-      # self.source.select {|_,tile| tile.empty_space? }.each do |location,space|
-        # self.source.delete(location) if space.neighbors[:insects].empty?
-      # end
-    # end
-
     def can_slide?(a, b)
       return false unless self.source[b].empty?
       return false unless Board.neighbors(*a).include?(b)
@@ -95,7 +89,7 @@ module Hive
         self.source.delete(space) if self.neighbors(*space)[:insects].empty?
       end
 
-      self.source.delete(location) if stack.empty?
+      # self.source.delete(location) if stack.empty?
     end
 
     def empty_spaces; self.select {|_,v| v.empty? }.map {|k,_| k }; end

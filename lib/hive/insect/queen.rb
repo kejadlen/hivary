@@ -7,6 +7,10 @@ module Hive
         raise IllegalOperation, "Can't place queen with first move" if self.game.turn / 2 == 0
         super
       end
+
+      def surrounded?
+        self.location and self.neighbors[:spaces].empty?
+      end
     end
   end
 end

@@ -47,6 +47,8 @@ module Hive
     def move(insect, location)
       self.validate_action
 
+      raise InvalidInsect unless insect.player == self
+
       insect.send((insect.played?) ? :move : :play, location)
 
       @game.turn += 1
