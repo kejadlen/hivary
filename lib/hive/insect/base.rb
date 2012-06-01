@@ -3,6 +3,7 @@ require_relative '../hive'
 module Hive
   class InvalidLocation < HiveError; end
   class QueenNotPlayed < HiveError; end
+  class UnderAnotherInsect < HiveError; end
   class OneHiveError < HiveError; end
 
   module Insect
@@ -47,7 +48,6 @@ module Hive
       end
 
       def play(location)
-        self.player.validate_action
         self.validate_placement
         raise InvalidLocation unless self.valid_placements.include?(location)
 
@@ -57,7 +57,7 @@ module Hive
       def validate_move
         raise InvalidInsect unless self.played?
         raise QueenNotPlayed unless self.player.queen.played?
-        raise IllegalOperation, 'Under another piece' unless self.board.insects.include?(self)
+        raise UnderAnotherInsect unless self.stack.top == self
         raise OneHiveError if self.breaks_hive?
       end
 
@@ -69,14 +69,11 @@ module Hive
       end
 
       def move(location)
-        self.player.validate_action
         self.validate_move
         raise InvalidLocation, 'Invalid location' unless self.valid_moves.include?(location)
 
         self.board.delete(self)
         self.board[*location] = self
-
-        # TODO: remove extraneous empty tiles
       end
     end
   end

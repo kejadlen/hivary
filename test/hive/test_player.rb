@@ -55,30 +55,51 @@ class TestPlayer < HiveTestCase
     assert_raises(InvalidTurn) { @alice.validate_action }
   end
 
-  # def test_move
-    # insect = MiniTest::Mock.new
+  def test_move_sends_correct_action_to_insect
+    insect = MiniTest::Mock.new
+    @game.current_player = @alice
+    @game.players = [@alice, @bob]
+    @game.turn = 0
 
-    # @game.players = @players
-    # @game.turn = 2
+    insect.expect :played?, false
+    insect.expect :send, nil, [:play, [0,0]]
+    @alice.move(insect, [0,0])
 
-    # @game.current_player = @alice
-    # insect.expect :move, nil, [[0,0]]
-    # insect.expect :player, @alice
-    # @alice.move(insect, [0,0])
-    # assert_equal [@bob, @alice], @players
-    # assert_equal 3, @game.turn
-    # @game.verify
-    # insect.verify
-    
-    # insect.expect :move, nil, [[1,0]]
-    # insect.expect :player, @alice
-    # @alice.move(insect, [1,0])
-    # assert_equal [@alice, @bob], @players
-    # assert_equal 4, @game.turn
-    # @game.verify
-    # insect.verify
-  # end
+    insect.expect :played?, true
+    insect.expect :send, nil, [:move, [0,0]]
+    @alice.move(insect, [0,0])
+
+    insect.verify
+  end
+
+  def test_move_increments_turn
+    insect = MiniTest::Mock.new
+    @game.board = Board.new
+    @game.current_player = @alice
+    @game.players = [@alice, @bob]
+    @game.turn = 0
+
+    @bob.insects << Insect::Base.new(@bob)
+
+    insect.expect :played?, false
+    insect.expect :send, nil, [:play, [0,0]]
+    @alice.move(insect, [0,0])
+
+    assert_equal 1, @game.turn
+    assert_equal [@bob, @alice], @game.players
+  end
 
   def test_skip_turn_with_no_moves
+    insect = MiniTest::Mock.new
+    @game.board = Board.new
+    @game.current_player = @alice
+    @game.players = [@alice, @bob]
+    @game.turn = 0
+
+    insect.expect :played?, false
+    insect.expect :send, nil, [:play, [0,0]]
+    @alice.move(insect, [0,0])
+
+    assert_equal [@alice, @bob], @game.players
   end
 end

@@ -56,7 +56,7 @@ class TestBeetle < HiveTestCase
 
   def test_covered_insect_cant_move
     board = Board.load(@alice => { Beetle:[[1,0]], Queen:[[0,1]], Base:[[1,1], [-1,0], [0,0], [0,-1]] },
-                       @bob => {})
+                       @bob   => {})
     @game.board = board
     @game.current_player = @alice
     @game.turn = 0
@@ -66,9 +66,31 @@ class TestBeetle < HiveTestCase
 
     beetle.move([0,0])
 
-    assert_raises(IllegalOperation) { insect.move([1,0]) }
+    assert_raises(UnderAnotherInsect) { insect.move([1,0]) }
   end
 
   def test_stack_multiple_beetles
+    board = Board.load(@alice => { Queen:[[0,0]], Beetle:[[0,1],[1,1]] },
+                       @bob   => { Queen:[[1,0]], Beetle:[[0,-1],[1,-1]] })
+    @game.board = board
+    @game.turn = 10
+
+    @game.current_player = @alice
+    board[0,1].move([0,0])
+    assert_equal @alice, board[0,0].player
+    
+    @game.current_player = @bob
+    board[0,-1].move([0,0])
+    assert_equal @bob, board[0,0].player
+
+    @game.current_player = @alice
+    board[1,1].move([0,0])
+    assert_equal @alice, board[0,0].player
+
+    @game.current_player = @bob
+    board[1,-1].move([0,0])
+    assert_equal @bob, board[0,0].player
+
+    assert_equal 5, board.source[[0,0]].size
   end
 end

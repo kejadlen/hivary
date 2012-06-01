@@ -54,8 +54,6 @@ class TestBoard < HiveTestCase
 
   def test_can_slide
     self.setup_game_mock
-    # @game.expect :current_player, @alice
-    # p @alice.current_player?
     board = Board.load(@alice => { Spider:[[0,0]], Queen:[[2,1]] },
                        @bob   => { Spider:[[1,2]] })
 
@@ -63,23 +61,31 @@ class TestBoard < HiveTestCase
     assert board.can_slide?([1,1], [0,1])
   end
 
-  # def test_remove_empty_spaces
-    # game = MiniTest::Mock.new
-    # game.expect :current_player, @alice
-    # [@alice, @bob].each {|player| player.game = game }
-    # board = Board.load(@alice => {Spider:[[0,0]]},
-                       # @bob   => {})
-    # board[-2,0] = EmptySpace.new(board, nil)
-    # board.remove_empty_spaces!
+  def test_remove_empty_spaces
+    self.setup_game_mock
+    board = Board.load(@alice => { Queen:[[0,0]], Beetle:[[0,1],[1,1]] },
+                       @bob   => { Queen:[[1,0]], Beetle:[[0,-1],[1,-1]] })
+    @game.board = board
+    @game.turn = 10
 
-    # refute_nil board[-1,0]
-    # refute_nil board[1,0]
-    # assert_nil board[-2,0]
-  # end
+    @game.current_player = @alice
+    board[0,1].move([0,0])
+    
+    @game.current_player = @bob
+    board[0,-1].move([0,0])
+
+    @game.current_player = @alice
+    board[1,1].move([0,0])
+
+    @game.current_player = @bob
+    board[1,-1].move([0,0])
+
+    assert_equal 8, board.source.select {|_,v| v.empty? }.length
+  end
 
   def test_neighbors
-    board = Board.load(@alice => {Base:[[1,0], [1,-1], [1,1]]},
-                       @bob => {Base:[[0,0]]})
+    board = Board.load(@alice => { Base:[[1,0], [1,-1], [1,1]] },
+                       @bob   => { Base:[[0,0]] })
     neighbors = board.neighbors(0,0)
 
     assert_equal 3, neighbors[:spaces].length
