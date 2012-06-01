@@ -52,12 +52,14 @@ class TestGame < HiveTestCase
   def test_over
     refute @game.over?
 
+    @game.turn = 0
+
     player = MiniTest::Mock.new
     queen = MiniTest::Mock.new
     queen.expect :surrounded?, true
     player.expect :queen, queen
-    @game.turn = 0
     @game.players << player
+
     assert @game.over?
   end
 

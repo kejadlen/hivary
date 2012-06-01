@@ -14,6 +14,8 @@ end
 
 class GameMock < MiniTest::Mock
   attr_accessor :board, :current_player, :players, :turn
+
+  def over?; false; end
 end
 
 class HiveTestCase < MiniTest::Unit::TestCase

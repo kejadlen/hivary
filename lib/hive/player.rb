@@ -4,6 +4,7 @@ module Hive
   class GameNotStarted < HiveError; end
   class InvalidInsect < HiveError; end
   class InvalidTurn < HiveError; end
+  class GameOver < HiveError; end
 
   class Player
     attr_accessor :game
@@ -40,7 +41,7 @@ module Hive
     def validate_action
       raise GameNotStarted if self.game.turn.nil?
       raise InvalidTurn unless self.current_player?
-      # raise GameOver if self.game.over?
+      raise GameOver if self.game.over?
     end
 
     def move(insect, location)

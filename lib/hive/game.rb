@@ -36,7 +36,6 @@ module Hive
     attr_accessor :turn
 
     def current_player; self.players.first; end
-    # def started?; not self.turn.nil?; end
 
     def initialize(players=[], board=nil, turn=nil, expansions=[])
       @insects = StartInsects.dup
@@ -64,7 +63,7 @@ module Hive
     end
 
     def over?
-      return false if self.turn.nil? # game hasn't even started!
+      return false if self.turn.nil?
 
       @players.any? {|player| player.queen.surrounded? }
     end
