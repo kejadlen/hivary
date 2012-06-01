@@ -56,18 +56,18 @@ module Hive
     def [](*location); self.source[location].top; end
 
     def []=(*location, insect)
-      self.source[location] ||= Stack.new(location)
+      self.source[location] ||= Stack.new(*location)
       self.source[location] << insect
       insect.stack = self.source[location]
 
       # Add empty stacks as necesssary
       Board.neighbors(*location).each do |neighbor|
-        self.source[neighbor] ||= Stack.new(neighbor)
+        self.source[neighbor] ||= Stack.new(*neighbor)
       end
     end
 
     def initialize
-      @source = { [0,0] => Stack.new([0,0]) }
+      @source = { [0,0] => Stack.new(0,0) }
     end
 
     # def remove_empty_spaces!
@@ -86,9 +86,16 @@ module Hive
     end
 
     def delete(insect)
-      stack = self.source[insect.location]
+      location = insect.location
+
+      stack = self.source[location]
       stack.delete(insect)
-      self.source.delete(insect.location) if stack.empty?
+
+      self.neighbors(*location)[:spaces].each do |space|
+        self.source.delete(space) if self.neighbors(*space)[:insects].empty?
+      end
+
+      self.source.delete(location) if stack.empty?
     end
 
     def empty_spaces; self.select {|_,v| v.empty? }.map {|k,_| k }; end

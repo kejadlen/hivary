@@ -8,8 +8,8 @@ module Hive
 
     attr_accessor :location
 
-    def initialize(location=nil, *args)
-      @source = args
+    def initialize(*location)
+      @source = []
       @location = location
     end
 
