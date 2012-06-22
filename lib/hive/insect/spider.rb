@@ -4,8 +4,9 @@ module Hive
   module Insect
     class Spider < Base
       def valid_moves
-        # Remove the spider from the board for freedom of movement calculations
-        self.board.delete(self)
+        # Remove the spider and don't replace it with an empty space (so
+        # it doesn't affect the movement calculation)
+        self.board.source.delete(self.location)
 
         moves = super
         moves &= self.neighbors[:insects].inject([]) {|ary,insect| ary + insect.neighbors[:spaces] }
@@ -22,6 +23,7 @@ module Hive
           end
         end
 
+        # Replace the spider
         self.board[*self.location] = self
 
         moves.map(&:last).uniq.sort

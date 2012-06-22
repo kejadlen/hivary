@@ -62,10 +62,12 @@ class TestPlayer < HiveTestCase
     @game.turn = 0
 
     insect.expect :played?, false
+    insect.expect :player, @alice
     insect.expect :send, nil, [:play, [0,0]]
     @alice.move(insect, [0,0])
 
     insect.expect :played?, true
+    insect.expect :player, @alice
     insect.expect :send, nil, [:move, [0,0]]
     @alice.move(insect, [0,0])
 
@@ -82,6 +84,7 @@ class TestPlayer < HiveTestCase
     @bob.insects << Insect::Base.new(@bob)
 
     insect.expect :played?, false
+    insect.expect :player, @alice
     insect.expect :send, nil, [:play, [0,0]]
     @alice.move(insect, [0,0])
 
@@ -97,6 +100,7 @@ class TestPlayer < HiveTestCase
     @game.turn = 0
 
     insect.expect :played?, false
+    insect.expect :player, @alice
     insect.expect :send, nil, [:play, [0,0]]
     @alice.move(insect, [0,0])
 
