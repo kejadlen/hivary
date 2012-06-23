@@ -67,9 +67,10 @@ module Hive
       insect = self.player.insects.find {|insect| insect.object_id == insect_id }
       self.player.move(insect, location)
 
-      self.player.game.current_player.connection.send_object({game:self.player.game})
+      game = self.player.game
+      game.current_player.connection.send_object({game:game})
 
-      self.player.game
+      game
     end
 
     def register(name)
