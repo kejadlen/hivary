@@ -21,7 +21,7 @@ class TestGame < HiveTestCase
 
     assert_nil @game.turn
 
-    @game.start!
+    @game.start
 
     @game.players.each {|player| player.verify }
 
@@ -65,7 +65,7 @@ class TestGame < HiveTestCase
 
   def test_play_ALL_the_insects
     [@alice, @bob].each {|player| player.join_game(@game) }
-    @game.start!
+    @game.start
 
     insects = @game.current_player.insects - [@game.current_player.queen]
     until insects.empty?

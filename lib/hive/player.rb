@@ -1,6 +1,8 @@
 require_relative 'hive'
 
 module Hive
+  class InvalidGame < HiveError; end
+  class GameFull < HiveError; end
   class GameNotStarted < HiveError; end
   class InvalidInsect < HiveError; end
   class InvalidTurn < HiveError; end
@@ -26,7 +28,8 @@ module Hive
     end
 
     def join_game(game)
-      raise IllegalOperation, 'Game already full' unless game.players.length < 2
+      raise InvalidGame if game.nil?
+      raise GameFull unless game.players.length < 2
 
       self.game = game
       game.players << self

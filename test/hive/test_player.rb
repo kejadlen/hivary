@@ -23,6 +23,7 @@ class TestPlayer < HiveTestCase
   def test_join_game
     @game.players = []
 
+    @game.expect :nil?, false
     @alice.join_game(@game)
 
     @game.verify
@@ -45,6 +46,8 @@ class TestPlayer < HiveTestCase
 
   def test_validate_action
     @game.players = []
+
+    @game.expect :nil?, false
     @alice.join_game(@game)
 
     assert_raises(GameNotStarted) { @alice.validate_action }

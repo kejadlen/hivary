@@ -48,7 +48,7 @@ module Hive
       @insects[Insect::Mosquito] = 1 if expansions.include?(:mosquito)
     end
 
-    def start!
+    def start
       raise IllegalOperation, 'Game has already started' unless self.turn.nil?
       raise IllegalOperation, 'Two players are required to start the game' unless self.players.length == 2
 
