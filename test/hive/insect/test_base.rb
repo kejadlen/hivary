@@ -1,3 +1,5 @@
+require 'json'
+
 require 'test_helper'
 
 class TestBase < HiveTestCase
@@ -123,5 +125,14 @@ class TestBase < HiveTestCase
     @game.turn = 2
     @insect.play([0,-1])
     assert_equal @insect, board[0,-1]
+  end
+
+  def test_to_json
+    json = JSON.load(@insect.to_json)
+
+    assert_equal @insect.object_id, json['id']
+    assert_equal @insect.player.object_id, json['player_id']
+    assert_equal 'Base', json['klass']
+    refute json['played']
   end
 end

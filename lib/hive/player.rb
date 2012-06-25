@@ -1,3 +1,5 @@
+require 'json'
+
 require_relative 'hive'
 
 module Hive
@@ -19,6 +21,10 @@ module Hive
     def initialize(name)
       @name = name
       @insects = []
+    end
+
+    def to_json(*a)
+      { id:self.object_id, name:self.name, insects:self.insects }.to_json(*a)
     end
 
     def can_move?

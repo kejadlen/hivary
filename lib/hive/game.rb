@@ -1,3 +1,4 @@
+require 'json'
 require 'set'
 
 require_relative '../hive'
@@ -46,6 +47,15 @@ module Hive
 
       @insects[Insect::Ladybug] = 1 if expansions.include?(:ladybug)
       @insects[Insect::Mosquito] = 1 if expansions.include?(:mosquito)
+    end
+
+    def to_json(*a)
+      {
+        id:self.object_id,
+        turn:self.turn,
+        current_player_id:self.current_player.object_id,
+        board:self.board
+      }.to_json(*a)
     end
 
     def start

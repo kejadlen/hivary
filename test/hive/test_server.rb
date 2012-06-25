@@ -144,7 +144,7 @@ class TestServer < HiveTestCase
       game_id = nil
       @socket.send_object({method:'create_game'})
       @socket.onreceive do |obj|
-        game_id = obj['body']
+        game_id = obj['body']['id']
 
         socket.send_object({method:'join_game', args:[game_id]})
         socket.onreceive do |obj|
@@ -180,7 +180,7 @@ class TestServer < HiveTestCase
       game_id = nil
       @socket.send_object({method:'create_game'})
       @socket.onreceive do |obj|
-        game_id = obj['body']
+        game_id = obj['body']['id']
 
         socket.send_object({method:'join_game', args:[game_id]})
         socket.onreceive do |obj|
@@ -204,5 +204,9 @@ class TestServer < HiveTestCase
         end
       end
     end
+  end
+
+  # TODO
+  def test_game_over
   end
 end

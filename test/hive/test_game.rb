@@ -1,3 +1,5 @@
+require 'json'
+
 require 'test_helper'
 
 class TestGame < HiveTestCase
@@ -73,5 +75,16 @@ class TestGame < HiveTestCase
       insect.play(insect.valid_placements.sample)
       insects = @game.current_player.insects.reject {|insect| insect.played? } - [@game.current_player.queen]
     end
+  end
+
+  def test_to_json
+    self.test_play_ALL_the_insects
+
+    json = JSON.load(@game.to_json)
+
+    assert_equal @game.object_id, json['id']
+    assert_equal @game.turn, json['turn']
+    assert_equal @game.current_player.object_id, json['current_player_id']
+    assert_equal JSON.load(@game.board.to_json), json['board']
   end
 end

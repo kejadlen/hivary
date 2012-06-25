@@ -51,7 +51,7 @@ module Hive
 
       self.player.join_game(game)
 
-      game.object_id
+      game
     end
 
     def games; self.server.games; end
@@ -70,6 +70,10 @@ module Hive
       game = self.player.game
       game.current_player.connection.send_object({game:game})
 
+      if game.over?
+        game.players.last.connection.send_object({game:game})
+      end
+
       game
     end
 
@@ -80,7 +84,7 @@ module Hive
 
       self.server.names << name
       self.player = ConnPlayer.new(name, self)
-      self.player.object_id
+      self.player
     end
     
     def receive_data(data)

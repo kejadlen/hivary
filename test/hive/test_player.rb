@@ -1,3 +1,5 @@
+require 'json'
+
 require 'test_helper'
 
 class TestPlayer < HiveTestCase
@@ -108,5 +110,12 @@ class TestPlayer < HiveTestCase
     @alice.move(insect, [0,0])
 
     assert_equal [@alice, @bob], @game.players
+  end
+
+  def test_to_json
+    json = JSON.load(@alice.to_json)
+    assert_equal @alice.object_id, json['id']
+    assert_equal 'Alice', json['name']
+    assert_empty json['insects']
   end
 end

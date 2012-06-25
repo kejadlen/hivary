@@ -1,3 +1,5 @@
+require 'json'
+
 require_relative '../hive'
 
 module Hive
@@ -52,6 +54,15 @@ module Hive
         raise InvalidLocation unless self.valid_placements.include?(location)
 
         self.board[*location] = self
+      end
+
+      def to_json(*a)
+        {
+          id:self.object_id,
+          klass:self.class.to_s.split('::').last,
+          player_id:self.player.object_id,
+          played:self.played?
+        }.to_json(*a)
       end
       
       def validate_move

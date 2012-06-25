@@ -70,6 +70,10 @@ module Hive
       @source = { [0,0] => Stack.new(0,0) }
     end
 
+    def to_json(*a)
+      @source.reject {|_,v| v.empty? }.to_json(*a)
+    end
+
     def can_slide?(a, b)
       return false unless self.source[b].empty?
       return false unless Board.neighbors(*a).include?(b)
