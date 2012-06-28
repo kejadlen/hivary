@@ -1,4 +1,5 @@
 require 'eventmachine'
+require 'logger'
 require 'json'
 
 require 'hive'
@@ -18,15 +19,17 @@ module Hive
   end
 
   class Server
+    attr_accessor :logger
     attr_reader :games, :names
 
     def initialize
+      @logger = Logger.new('/dev/null')
       @games = []
       @names = []
     end
 
-    def start
-      @instance = EM.start_server('0.0.0.0', 3000, Connection) do |con|
+    def start(ip='0.0.0.0', port=3000)
+      @instance = EM.start_server(ip, port, Connection) do |con|
         con.server = self
       end
     end
@@ -38,10 +41,11 @@ module Hive
 
   class Connection < EM::Connection
     attr_accessor :server
-
     attr_accessor :player, :opponent
 
-    AllowedMethods = %w[ create_game games join_game move register ]
+    AllowedMethods = %w[ create_game games join_game move register unregister ]
+
+    def logger; self.server.logger; end
 
     def create_game
       raise NotRegisteredError if self.player.nil?
@@ -103,6 +107,8 @@ module Hive
     end
 
     def receive_object(obj)
+      self.logger.debug("received object #{obj}")
+
       method = obj['method']
       args = obj['args'] || []
       if AllowedMethods.include?(method)
@@ -119,14 +125,10 @@ module Hive
     
     def send_object(obj)
       data = JSON.dump(obj)
+
+      self.logger.debug("sending object #{data}")
+
       self.send_data([data.bytesize, data].pack('Na*'))
     end
   end
-end
-
-if __FILE__ == $0
-  EM::run {
-    s = Hive::Server.new
-    s.start
-  }
 end
