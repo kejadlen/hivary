@@ -20,12 +20,12 @@ module Hive
 
   class Server
     attr_accessor :logger
-    attr_reader :games, :names
+    attr_reader :games, :players
 
     def initialize
       @logger = Logger.new('/dev/null')
       @games = []
-      @names = []
+      @players = []
     end
 
     def start(ip='0.0.0.0', port=3000)
@@ -82,12 +82,12 @@ module Hive
     end
 
     def register(name)
-      raise DuplicateNameError if self.server.names.include?(name)
+      raise DuplicateNameError if self.server.players.map(&:name).include?(name)
 
-      self.server.names.delete(self.player.name) unless self.player.nil?
+      self.server.players.delete(self.player) unless self.player.nil?
 
-      self.server.names << name
       self.player = ConnPlayer.new(name, self)
+      self.server.players << self.player
       self.player
     end
     
@@ -129,6 +129,10 @@ module Hive
       self.logger.debug("sending object #{data}")
 
       self.send_data([data.bytesize, data].pack('Na*'))
+    end
+
+    def unregister(player_id)
+      self.server.players.delete_if {|player| player.object_id == player_id }
     end
   end
 end

@@ -77,7 +77,7 @@ class TestServer < HiveTestCase
         assert_equal 200, obj['status']
         refute_nil obj['body']
 
-        assert_equal ['bob'], @server.names
+        assert_equal ['bob'], @server.players.map(&:name)
 
         EM.stop
       end
@@ -201,6 +201,19 @@ class TestServer < HiveTestCase
               EM.stop
             end
           end
+        end
+      end
+    end
+  end
+
+  def test_unregister
+    em do
+      @socket.send_object({method:'register', args:['bob']})
+      @socket.onreceive do |obj|
+        player_id = obj['body']['id']
+        @socket.send_object({method:'unregister', args:[player_id]})
+        @socket.onreceive do |_|
+          assert_empty @server.players
         end
       end
     end
