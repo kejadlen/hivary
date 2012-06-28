@@ -209,13 +209,9 @@ class TestServer < HiveTestCase
   def test_unregister
     em do
       @socket.send_object({method:'register', args:['bob']})
-      @socket.onreceive do |obj|
-        player_id = obj['body']['id']
-        @socket.send_object({method:'unregister', args:[player_id]})
-        @socket.onreceive do |_|
-          assert_empty @server.players
-        end
-      end
+      @socket.close_connection
+
+      assert_empty @server.players
     end
   end
 

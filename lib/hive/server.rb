@@ -131,8 +131,8 @@ module Hive
       self.send_data([data.bytesize, data].pack('Na*'))
     end
 
-    def unregister(player_id)
-      self.server.players.delete_if {|player| player.object_id == player_id }
+    def unbind
+      self.server.players.delete(self.player)
     end
   end
 end
