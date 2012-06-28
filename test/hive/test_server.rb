@@ -35,6 +35,7 @@ end
 
 class TestServer < HiveTestCase
   def em(timeout=0.1)
+    @stopped = false
     EM.run do
       @server = Server.new
       @server.start
@@ -47,6 +48,12 @@ class TestServer < HiveTestCase
 
       EM.add_timer(timeout) { EM.stop }
     end
+    assert @stopped, 'EM test ended early!'
+  end
+
+  def stop
+    @stopped = true
+    EM.stop
   end
 
   def test_json_parse_error
@@ -55,7 +62,7 @@ class TestServer < HiveTestCase
       # @socket.onmessage = lambda do |obj|
       @socket.onreceive do |obj|
         assert_equal 401, obj['status']
-        EM.stop
+        stop
       end
     end
   end
@@ -65,7 +72,7 @@ class TestServer < HiveTestCase
       @socket.send_object({method:'foo', args:['bob']})
       @socket.onreceive do |obj|
         assert_equal 405, obj['status']
-        EM.stop
+        stop
       end
     end
   end
@@ -79,7 +86,7 @@ class TestServer < HiveTestCase
 
         assert_equal ['bob'], @server.players.map(&:name)
 
-        EM.stop
+        stop
       end
     end
   end
@@ -91,7 +98,7 @@ class TestServer < HiveTestCase
       socket.onreceive do |obj|
         assert_equal 409, obj['status']
         assert_equal 'DuplicateNameError', obj['body']
-        EM.stop
+        stop
       end
     end
   end
@@ -102,7 +109,7 @@ class TestServer < HiveTestCase
       @socket.onreceive do |obj|
         assert_equal 200, obj['status']
         assert_equal [], obj['body']
-        EM.stop
+        stop
       end
     end
   end
@@ -117,7 +124,7 @@ class TestServer < HiveTestCase
         assert_equal 1, @server.games.length
         assert_equal 'alice', @server.games[0].players[0].name
 
-        EM.stop
+        stop
       end
     end
   end
@@ -130,13 +137,13 @@ class TestServer < HiveTestCase
       socket.onreceive do |obj|
         assert_equal 409, obj['status']
         assert_equal 'NotRegisteredError', obj['body']
-        EM.stop
+        stop
       end
     end
   end
 
   def test_join_game
-    em do
+    em(2) do
       socket = EM.connect('0.0.0.0', 3000, FakeSocketClient)
       socket.send_object({method:'register', args:['bob']})
       socket.onreceive {}
@@ -149,9 +156,14 @@ class TestServer < HiveTestCase
         socket.send_object({method:'join_game', args:[game_id]})
         socket.onreceive do |obj|
           assert_equal 200, obj['status']
-
           assert_equal 0, @server.games[0].turn
-          EM.stop
+
+          @socket.onreceive do |obj|
+            assert_equal 200, obj['status']
+            assert_equal JSON.load(@server.games[0].to_json), obj['body']
+
+            stop
+          end
         end
       end
     end
@@ -166,13 +178,13 @@ class TestServer < HiveTestCase
       socket.send_object({method:'join_game', args:[123456789]})
       socket.onreceive do |obj|
         assert_equal 409, obj['status']
-        EM.stop
+        stop
       end
     end
   end
 
   def test_move
-    em do
+    em(2) do
       socket = EM.connect('0.0.0.0', 3000, FakeSocketClient)
       socket.send_object({method:'register', args:['bob']})
       socket.onreceive {}
@@ -196,9 +208,10 @@ class TestServer < HiveTestCase
             assert_equal 1, @server.games[0].turn
 
             sockets[1].onreceive do |obj|
-              assert_equal ['game'], obj.keys
+              assert_equal 200, obj['status']
+              assert_equal JSON.load(@server.games[0].to_json), obj['body']
 
-              EM.stop
+              stop
             end
           end
         end
@@ -212,6 +225,8 @@ class TestServer < HiveTestCase
       @socket.close_connection
 
       assert_empty @server.players
+
+      stop
     end
   end
 

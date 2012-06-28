@@ -8,6 +8,7 @@ module Hive
   class ServerError < HiveError; end
   class DuplicateNameError < ServerError; end
   class NotRegisteredError < ServerError; end
+  class NoGameError < ServerError; end
 
   class ConnPlayer < Player
     attr_reader :connection
@@ -55,6 +56,14 @@ module Hive
 
       self.player.join_game(game)
 
+      timer = EM.add_periodic_timer(1) do
+        if game.turn
+          self.send_object({status:200, body:game})
+          timer.cancel
+        end
+        # TODO: should probably add timeout logic at some point here
+      end
+
       game
     end
 
@@ -62,8 +71,16 @@ module Hive
 
     def join_game(game_id)
       game = self.server.games.find {|game| game.object_id == game_id }
+      raise NoGameError if game.nil?
+
+      self.opponent = game.players[0]
+      self.opponent.connection.opponent = self.player
+
       self.player.join_game(game)
       game.start
+
+      self.opponent.connection.send_object({status:200, body:game})
+
       game
     end
 
@@ -72,11 +89,8 @@ module Hive
       self.player.move(insect, location)
 
       game = self.player.game
-      game.current_player.connection.send_object({game:game})
 
-      if game.over?
-        game.players.last.connection.send_object({game:game})
-      end
+      self.opponent.connection.send_object({status:200, body:game})
 
       game
     end
@@ -90,7 +104,7 @@ module Hive
       self.server.players << self.player
       self.player
     end
-    
+
     def receive_data(data)
       (@buf ||= '') << data
 
