@@ -4,6 +4,8 @@ module Hive
   module Insect
     class Spider < Base
       def valid_moves
+        return [] unless self.played?
+
         # Remove the spider and don't replace it with an empty space (so
         # it doesn't affect the movement calculation)
         self.board.source.delete(self.location)

@@ -15,6 +15,7 @@ class TestQueen < HiveTestCase
 
     (0..1).each do |turn|
       @game.turn = turn
+      assert_empty @queen.valid_placements
       assert_raises(IllegalOperation) { @queen.play([0,0]) }
     end
   end

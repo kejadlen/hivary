@@ -38,6 +38,8 @@ module Hive
       end
 
       def valid_placements
+        return [] if self.played?
+
         spaces = self.board.empty_spaces
 
         return spaces if self.game.turn == 1
@@ -71,6 +73,8 @@ module Hive
       end
 
       def valid_moves
+        return [] unless self.played?
+
         self.neighbors[:spaces].select do |space|
           self.board.neighbors(*space)[:insects].uniq != [self] and
             self.board.can_slide?(self.location, space)

@@ -8,6 +8,12 @@ module Hive
         super
       end
 
+      def valid_placements
+        return [] if self.game.turn / 2 == 0
+
+        super
+      end
+
       def surrounded?
         self.location and self.neighbors[:spaces].empty?
       end

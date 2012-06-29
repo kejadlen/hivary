@@ -47,6 +47,7 @@ class TestBase < HiveTestCase
                              @bob => {Base:[[1,0]]})
     @game.turn = 2
     assert_equal [[-1,0], [0,-1], [0,1]], @insect.valid_placements
+    assert_empty @game.board[0,0].valid_placements
   end
 
   def test_invalid_placement
@@ -69,6 +70,7 @@ class TestBase < HiveTestCase
     @game.expect :current_player, @alice
 
     assert_equal [[1,-1], [1,1]], board[0,0].valid_moves
+    assert_empty @insect.valid_moves
   end
 
   def test_invalid_moves

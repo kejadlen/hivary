@@ -7,6 +7,11 @@ class TestSpider < HiveTestCase
     self.setup_game_mock
   end
 
+  def test_valid_moves
+    spider = Insect::Spider.new(@alice)
+    assert_empty spider.valid_moves
+  end
+
   def test_moves_three_spaces
     board = Board.load(@alice => { Ant:[[0,0]], Queen:[[0,-1]],
                                    Grasshopper:[[1,-2]], Spider:[[2,2]],
