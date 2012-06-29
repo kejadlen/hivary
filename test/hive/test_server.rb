@@ -9,7 +9,7 @@ class FakeSocketClient < EM::Connection
   include EM::P::ObjectProtocol
   def serializer; JSON; end
 
-  attr_reader :data
+  attr_reader :blocks, :data, :sent
 
   def initialize
     @blocks = []
