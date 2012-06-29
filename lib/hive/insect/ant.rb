@@ -27,7 +27,7 @@ module Hive
           moves << move
         end
 
-        extra_spaces.each {|space| self.board.source[location] = Stack.new }
+        extra_spaces.each {|space| self.board.source[space] = Stack.new }
 
         moves.sort
       end
