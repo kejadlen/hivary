@@ -58,10 +58,8 @@ module Hive
 
       def to_json(*a)
         {
-          id:self.object_id,
-          klass:self.class.to_s.split('::').last,
-          player_id:self.player.object_id,
-          played:self.played?
+          klass:self.class,
+          location:self.location
         }.to_json(*a)
       end
       

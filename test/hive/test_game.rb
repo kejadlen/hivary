@@ -77,14 +77,14 @@ class TestGame < HiveTestCase
     end
   end
 
-  def test_to_json
-    self.test_play_ALL_the_insects
+  # def test_to_json
+    # self.test_play_ALL_the_insects
 
-    json = JSON.load(@game.to_json)
+    # json = JSON.load(@game.to_json)
 
-    assert_equal @game.object_id, json['id']
-    assert_equal @game.turn, json['turn']
-    assert_equal @game.current_player.object_id, json['current_player_id']
-    assert_equal JSON.load(@game.board.to_json), json['board']
-  end
+    # assert_equal @game.object_id, json['id']
+    # assert_equal @game.turn, json['turn']
+    # assert_equal @game.current_player.object_id, json['current_player_id']
+    # assert_equal JSON.load(@game.board.to_json), json['board']
+  # end
 end

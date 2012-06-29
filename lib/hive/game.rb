@@ -49,15 +49,6 @@ module Hive
       @insects[Insect::Mosquito] = 1 if expansions.include?(:mosquito)
     end
 
-    def to_json(*a)
-      {
-        id:self.object_id,
-        turn:self.turn,
-        current_player_id:self.current_player.object_id,
-        board:self.board
-      }.to_json(*a)
-    end
-
     def start
       raise IllegalOperation, 'Game has already started' unless self.turn.nil?
       raise IllegalOperation, 'Two players are required to start the game' unless self.players.length == 2

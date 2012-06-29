@@ -36,18 +36,25 @@ end
 class TestServer < HiveTestCase
   def em(timeout=0.1)
     @stopped = false
+
     EM.run do
       @server = Server.new
       @server.start
 
-      @socket = EM.connect('0.0.0.0', 3000, FakeSocketClient)
-      @socket.send_object({method:'register', args:['alice']})
-      @socket.onreceive {}
+      @alice = EM.connect('0.0.0.0', 3000, FakeSocketClient)
+      @alice.send_object({method:'register', args:['alice']})
+      @alice.onreceive {}
+
+      @bob = EM.connect('0.0.0.0', 3000, FakeSocketClient)
 
       yield
 
       EM.add_timer(timeout) { EM.stop }
     end
+
+    assert_empty @alice.blocks
+    assert_empty @bob.blocks
+
     assert @stopped, 'EM test ended early!'
   end
 
@@ -58,9 +65,9 @@ class TestServer < HiveTestCase
 
   def test_json_parse_error
     em do
-      @socket.send_data([1, '{'].pack('Na*'))
-      # @socket.onmessage = lambda do |obj|
-      @socket.onreceive do |obj|
+      @alice.send_data([1, '{'].pack('Na*'))
+      # @alice.onmessage = lambda do |obj|
+      @alice.onreceive do |obj|
         assert_equal 401, obj['status']
         stop
       end
@@ -69,8 +76,8 @@ class TestServer < HiveTestCase
 
   def test_method_not_allowed
     em do
-      @socket.send_object({method:'foo', args:['bob']})
-      @socket.onreceive do |obj|
+      @alice.send_object({method:'foo', args:['bob']})
+      @alice.onreceive do |obj|
         assert_equal 405, obj['status']
         stop
       end
@@ -79,8 +86,8 @@ class TestServer < HiveTestCase
 
   def test_register
     em do
-      @socket.send_object({method:'register', args:['bob']})
-      @socket.onreceive do |obj|
+      @alice.send_object({method:'register', args:['bob']})
+      @alice.onreceive do |obj|
         assert_equal 200, obj['status']
         refute_nil obj['body']
 
@@ -93,9 +100,8 @@ class TestServer < HiveTestCase
 
   def test_register_error
     em do
-      socket = EM.connect('0.0.0.0', 3000, FakeSocketClient)
-      socket.send_object({method:'register', args:['alice']})
-      socket.onreceive do |obj|
+      @bob.send_object({method:'register', args:['alice']})
+      @bob.onreceive do |obj|
         assert_equal 409, obj['status']
         assert_equal 'DuplicateNameError', obj['body']
         stop
@@ -105,8 +111,8 @@ class TestServer < HiveTestCase
 
   def test_games
     em do
-      @socket.send_object({method:'games'})
-      @socket.onreceive do |obj|
+      @alice.send_object({method:'games'})
+      @alice.onreceive do |obj|
         assert_equal 200, obj['status']
         assert_equal [], obj['body']
         stop
@@ -116,8 +122,8 @@ class TestServer < HiveTestCase
 
   def test_create_game
     em do
-      @socket.send_object({method:'create_game'})
-      @socket.onreceive do |obj|
+      @alice.send_object({method:'create_game'})
+      @alice.onreceive do |obj|
         assert_equal 200, obj['status']
         refute_nil obj['body']
 
@@ -149,22 +155,25 @@ class TestServer < HiveTestCase
       socket.onreceive {}
 
       game_id = nil
-      @socket.send_object({method:'create_game'})
-      @socket.onreceive do |obj|
+
+      @alice.send_object({method:'create_game'})
+
+      @alice.onreceive do |obj|
         game_id = obj['body']['id']
 
         socket.send_object({method:'join_game', args:[game_id]})
-        socket.onreceive do |obj|
-          assert_equal 200, obj['status']
-          assert_equal 0, @server.games[0].turn
+      end
 
-          @socket.onreceive do |obj|
-            assert_equal 200, obj['status']
-            assert_equal JSON.load(@server.games[0].to_json), obj['body']
+      socket.onreceive do |obj|
+        assert_equal 200, obj['status']
+        assert_equal 0, @server.games[0].turn
+      end
 
-            stop
-          end
-        end
+      @alice.onreceive do |obj|
+        assert_equal 200, obj['status']
+        assert_nil obj['body']['last_move']
+
+        stop
       end
     end
   end
@@ -190,44 +199,57 @@ class TestServer < HiveTestCase
       socket.onreceive {}
 
       game_id = nil
-      @socket.send_object({method:'create_game'})
-      @socket.onreceive do |obj|
+      sockets = [@alice, socket]
+      insect = nil
+
+      @alice.send_object({method:'create_game'})
+
+      @alice.onreceive do |obj|
         game_id = obj['body']['id']
 
         socket.send_object({method:'join_game', args:[game_id]})
-        socket.onreceive do |obj|
-          players = @server.games[0].players
-          sockets = [@socket, socket]
-          sockets << sockets.shift if players[0].name != 'alice'
+      end
 
-          insect = players[0].insects.reject {|insect| Insect::Queen === insect }.sample
-          sockets[0].send_object({method:'move', args:[insect.object_id, [0,0]]})
-          sockets[0].onreceive do |obj|
-            assert_equal 200, obj['status']
+      socket.onreceive do |obj|
+        players = @server.games[0].players
+        sockets << sockets.shift if players[0].name != 'alice'
 
-            assert_equal 1, @server.games[0].turn
+        insect = players[0].insects.reject {|insect| Insect::Queen === insect }.sample
+        # sockets[0].send_object({method:'move', args:[insect.object_id, [0,0]]})
+        sockets[0].send_object({method:'move', args:[insect, [0,0]]})
+      end
 
-            sockets[1].onreceive do |obj|
-              assert_equal 200, obj['status']
-              assert_equal JSON.load(@server.games[0].to_json), obj['body']
+      # sockets[1].onreceive do |obj|
+        # assert_equal 200, obj['status']
+        # assert_equal [insect.class.to_s, [0,0]], obj['body']['last_move']
 
-              stop
-            end
-          end
-        end
+        # assert_equal 1, @server.games[0].turn
+      # end
+
+      sockets[0].onreceive do |obj|
+        assert_equal 200, obj['status']
+        assert_equal @server.games[0].players[1].object_id, obj['body']['id']
+        assert_equal insect.class.to_s, obj['body']['last_move'][0]['klass']
+        assert_equal nil, obj['body']['last_move'][0]['location']
+        assert_equal [0,0], obj['body']['last_move'][1]
+
+        assert_equal 1, @server.games[0].turn
+
+        stop
       end
     end
   end
 
   def test_unregister
     em do
-      @socket.send_object({method:'register', args:['bob']})
-      @socket.close_connection
-
-      assert_empty @server.players
-
-      stop
+      @alice.send_object({method:'register', args:['bob']})
+      @alice.onreceive do
+        @alice.close_connection
+        stop
+      end
     end
+
+    assert_empty @server.players
   end
 
   # TODO
