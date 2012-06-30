@@ -23,9 +23,9 @@ module Hive
       @insects = []
     end
 
-    # def to_json(*a)
-      # { id:self.object_id, name:self.name, insects:self.insects }.to_json(*a)
-    # end
+    def to_json(*a)
+      { id:self.object_id, name:self.name, insects:self.insects }.to_json(*a)
+    end
 
     def legal_insects
       insects = self.insects.map do |insect|
