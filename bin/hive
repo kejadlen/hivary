@@ -1,0 +1,180 @@
+#!/usr/bin/env ruby
+
+require 'logger'
+
+require 'eventmachine'
+require 'highline/import'
+require 'json'
+require 'thor'
+
+$LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
+require 'hive'
+
+module Hive
+  class Client < EM::Connection
+    def create_game(body)
+      if body.include?('last_move')
+        self.start_game(body)
+      else
+        say('Waiting for an opponent...')
+      end
+    end
+
+    def create_game_error(body)
+      say("[#{body}] - could not create game.")
+      self.send_object({method:'games'})
+    end
+
+    def games(body)
+      choose do |menu|
+        menu.choice('Refresh list of games') do
+          self.send_object({method:'games'})
+        end
+        body.each do |game_id|
+          menu.choice(game_id) do
+            self.send_object({method:'join_game', args:[game_id]})
+          end
+        end
+        menu.choice('Create new game') do
+          self.send_object({method:'create_game'})
+        end
+      end
+    end
+
+    def join_game(body)
+      self.start_game(body)
+    end
+
+    def join_game_error(body)
+    end
+
+    def play_last_move(body)
+      game = @player.game
+
+      if body['last_move']
+        insect = body['last_move'][0]
+        insect = if insect['location'].nil?
+                   game.current_player.insects.find {|i| not i.played? and
+                                                     i.class.to_s == insect['klass'] }
+                 else
+                   game.board[*insect['location']]
+                 end
+        game.current_player.move(insect, body['last_move'][1])
+      end
+    end
+
+    def move(body)
+      self.play_last_move(body)
+
+      if @player.current_player?
+        insects = @player.legal_insects
+
+        say(@player.game.board.to_s)
+
+        choose do |menu|
+          insects.each do |insect,ary|
+            menu.choice(insect) do
+              choose do |submenu|
+                ary.each do |location|
+                  submenu.choice(location) do
+                    self.send_object({method:'move', args:[insect, location]})
+                  end
+                end
+              end
+            end
+          end
+        end
+      else
+        say('Waiting for opponent to move...')
+      end
+    end
+
+    def move_error(body)
+      say("Error: #{body}")
+      self.move({})
+    end
+
+    def register(body)
+      @player = Player.new(body['id'])
+      self.send_object({method:'games'})
+    end
+
+    def register_error(body)
+      name = ask("[#{body}] Name? ")
+      self.send_object({method:'register', args:[name]})
+    end
+
+    def start_game(body)
+      game = Game.new
+      opponent = Player.new(body['opp_id'])
+      [@player, opponent].each {|player| player.join_game(game) }
+      game.start
+
+      if game.current_player.name != body['id']
+        game.players << game.players.shift
+      end
+
+      if body['last_move'].nil?
+        self.move(body)
+      else
+        say('Game started, waiting for opponent to move...')
+      end
+
+      @state = :move
+    end
+
+    ### EventMachine
+    
+    include EM::P::ObjectProtocol
+    def serializer; JSON; end
+
+    def post_init
+      @logger = Logger.new(STDOUT)
+
+      @game = nil
+      @player_id = nil
+    end
+
+    def receive_object(obj)
+      @logger.debug(obj)
+      
+      if obj['status'] != 200
+        self.send("#{@state}_error".to_sym, obj['body'])
+      else
+        self.send(@state.to_sym, obj['body'])
+      end
+    end
+
+    def send_object(obj)
+      @state = obj[:method]
+      super(obj)
+    end
+  end
+end
+
+class HiveApp < Thor
+  desc 'server', ''
+  def server
+    require 'hive/server'
+    EM::run do
+      s = Hive::Server.new
+      s.logger = Logger.new(STDOUT)
+      s.logger.level = Logger::INFO
+      s.start
+    end
+  end
+  
+  desc 'client NAME', ''
+  method_option :host, :default => '0.0.0.0'
+  method_option :port, :default => 3000
+  def client(name)
+    EM.run do
+      client = EM.connect(options[:host], options[:port], Hive::Client)
+      client.send_object({method:'register', args:[name]})
+    end
+  end
+end
+
+if $0 == __FILE__
+  HiveApp.start
+end

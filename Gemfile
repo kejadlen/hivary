@@ -14,3 +14,5 @@ gem 'pry-nav'
 
 gem 'eventmachine'
 gem 'em-websocket'
+gem 'highline'
+gem 'thor'
