@@ -69,7 +69,11 @@ module Hive
       {id:game.object_id}
     end
 
-    def games; self.server.games.map(&:object_id); end
+    def games
+      self.server.games.map do |game|
+        [game.object_id, game.players[0].name]
+      end
+    end
 
     def join_game(game_id)
       game = self.server.games.find {|game| game.object_id == game_id }

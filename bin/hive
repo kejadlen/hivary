@@ -30,8 +30,8 @@ module Hive
         menu.choice('Refresh list of games') do
           self.send_object({method:'games'})
         end
-        body.each do |game_id|
-          menu.choice(game_id) do
+        body.each do |game_id,name|
+          menu.choice("#{game_id} (#{name})") do
             self.send_object({method:'join_game', args:[game_id]})
           end
         end

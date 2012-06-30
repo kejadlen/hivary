@@ -115,6 +115,18 @@ class TestServer < HiveTestCase
       @alice.onreceive do |obj|
         assert_equal 200, obj['status']
         assert_equal [], obj['body']
+      end
+
+      @alice.send_object({method:'create_game'})
+      @alice.onreceive {}
+
+      @alice.send_object({method:'games'})
+      @alice.onreceive do |obj|
+        game = @server.games[0]
+
+        assert_equal 200, obj['status']
+        assert_equal [[game.object_id, 'alice']], obj['body']
+
         stop
       end
     end
