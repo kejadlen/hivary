@@ -29,4 +29,17 @@ class TestSpider < HiveTestCase
     spider = board[0,0]
     assert_empty spider.valid_moves
   end
+
+  def test_edge_cases
+    board = Board.load(@alice => { Spider:[[0,0]],
+                                   Base:[[0,1], [1,1], [2,1],
+                                         [-1,0],
+                                         [0,-1], [2,-1],
+                                         [0,-2], [1,-2]] },
+                       @bob   => {})
+    @game.board = board
+
+    spider = board[0,0]
+    assert_empty spider.valid_moves
+  end
 end

@@ -15,7 +15,7 @@ module Hive
         moves.select! {|move| self.board.can_slide?(self.location, move) }
         moves.map! {|move| [move] }
 
-        until moves.first.length == 3
+        until moves.empty? or moves.first.length == 3
           move = moves.shift
 
           neighbors = self.board.neighbors(*move.last)
