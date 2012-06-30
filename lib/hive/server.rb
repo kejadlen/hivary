@@ -21,12 +21,12 @@ module Hive
 
   class Server
     attr_accessor :logger
-    attr_reader :games, :players
+    attr_reader :games, :users
 
     def initialize
       @logger = Logger.new('/dev/null')
       @games = []
-      @players = []
+      @users = {}
     end
 
     def start(ip='0.0.0.0', port=3000)
@@ -42,11 +42,12 @@ module Hive
 
   class Connection < EM::Connection
     attr_accessor :server
-    attr_accessor :player, :opponent
+    attr_accessor :name, :opponent
 
     AllowedMethods = %w[ create_game games join_game move register unregister ]
 
     def logger; self.server.logger; end
+    def player; self.server.users[self.name]; end
 
     def create_game
       raise NotRegisteredError if self.player.nil?
@@ -93,36 +94,28 @@ module Hive
 
       game = self.player.game
 
-      # insect = self.player.insects.find {|insect| insect.object_id == insect_id }
-      insect = if insect['location'].nil?
-                 self.player.insects.find {|i| not i.played? and
-                                           i.class.to_s == insect['klass'] }
-               else
-                 game.board[*insect['location']]
-               end
+      insect = Server.insect_from_move(game, insect)
 
       self.player.move(insect, location)
 
       self.opponent.connection.send_object({status:200,
                                             body:{id:self.player.object_id,
                                                   last_move:last_move}})
-                                            # body:{last_move:{id:self.player.object_id,
-                                                             # insect:insect}}})#,
-                                                             # location:location}}})
 
-      # {last_move:{id:self.player.object_id, insect:insect}} #, location:location}}
       {id:self.player.object_id, last_move:last_move}
     end
 
     def register(name)
-      raise DuplicateNameError if self.server.players.map(&:name).include?(name)
+      raise DuplicateNameError if self.server.users.include?(name)
 
       # Unregister previously registered player
-      self.server.players.delete(self.player) unless self.player.nil?
+      self.server.users.delete(self.name)
 
-      self.player = ConnPlayer.new(name, self)
-      self.server.players << self.player
-      self.player
+      self.name = name
+
+      player = ConnPlayer.new(self.name, self)
+      self.server.users[self.name] = player
+      player
     end
 
     def receive_data(data)
@@ -167,7 +160,8 @@ module Hive
     end
 
     def unbind
-      self.server.players.delete(self.player)
+      self.server.users.delete(self.name)
+      # TODO: Allow users to rejoin games
       self.server.games.delete_if {|game| game.players.include?(self.player) }
     end
   end

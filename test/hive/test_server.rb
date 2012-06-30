@@ -91,7 +91,7 @@ class TestServer < HiveTestCase
         assert_equal 200, obj['status']
         refute_nil obj['body']
 
-        assert_equal ['bob'], @server.players.map(&:name)
+        assert_includes @server.users, 'bob'
 
         stop
       end
@@ -261,7 +261,7 @@ class TestServer < HiveTestCase
       end
     end
 
-    assert_empty @server.players
+    assert_empty @server.users
   end
 
   # TODO
