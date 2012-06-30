@@ -23,6 +23,10 @@ module Hive
         @player = player
       end
 
+      def to_json(*a)
+        { klass:self.class.to_s.split('::').last, }.to_json(*a)
+      end
+      
       def to_s; "<#{self.class.to_s.split('::').last}#{self.location}>"; end
 
       def neighbors; self.board.neighbors(*self.location); end
@@ -49,7 +53,6 @@ module Hive
 
         spaces.reject do |location|
           neighbors = Board.neighbors(*location).map {|neighbor| self.board[*neighbor] rescue nil }.compact
-          # neighbors = self.board[*location].neighbors[:insects]
           neighbors.any? {|neighbor| neighbor.player != self.player }
         end
       end
@@ -61,13 +64,6 @@ module Hive
         self.board[*location] = self
       end
 
-      def to_json(*a)
-        {
-          klass:self.class,
-          location:self.location
-        }.to_json(*a)
-      end
-      
       def validate_move
         raise InvalidInsect unless self.played?
         raise QueenNotPlayed unless self.player.queen.played?
