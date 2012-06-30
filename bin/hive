@@ -9,6 +9,7 @@ require 'thor'
 
 $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 require 'hive'
+require 'hive/server'
 
 module Hive
   class Client < EM::Connection
@@ -53,12 +54,7 @@ module Hive
 
       if body['last_move']
         insect = body['last_move'][0]
-        insect = if insect['location'].nil?
-                   game.current_player.insects.find {|i| not i.played? and
-                                                     i.class.to_s == insect['klass'] }
-                 else
-                   game.board[*insect['location']]
-                 end
+        insect = Server.insect_from_move(game, insect)
         game.current_player.move(insect, body['last_move'][1])
       end
     end
@@ -155,7 +151,6 @@ end
 class HiveApp < Thor
   desc 'server', ''
   def server
-    require 'hive/server'
     EM::run do
       s = Hive::Server.new
       s.logger = Logger.new(STDOUT)

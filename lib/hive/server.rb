@@ -23,6 +23,17 @@ module Hive
     attr_accessor :logger
     attr_reader :games, :users
 
+    class << self
+      def insect_from_move(game, insect)
+        if insect['location'].nil?
+          game.current_player.insects.find {|i| not i.played? and
+                                    i.class.to_s == insect['klass'] }
+        else
+          game.board[*insect['location']]
+        end
+      end
+    end
+
     def initialize
       @logger = Logger.new('/dev/null')
       @games = []
