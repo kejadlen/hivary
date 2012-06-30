@@ -26,12 +26,21 @@ module Hive
     # def to_json(*a)
       # { id:self.object_id, name:self.name, insects:self.insects }.to_json(*a)
     # end
+
+    def legal_insects
+      insects = self.insects.map do |insect|
+        ary = if insect.played?
+                insect.can_move? and insect.valid_moves
+              else
+                insect.can_play? and insect.valid_placements
+              end
+        [insect, ary]
+      end
+      insects.reject {|_,ary| not ary or ary.empty? }
     end
 
     def can_move?
-      self.insects.any? do |insect|
-        not insect.valid_placements.empty? or not insect.valid_moves.empty?
-      end
+      not self.legal_insects.empty?
     end
 
     def join_game(game)

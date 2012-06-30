@@ -61,11 +61,11 @@ class TestPlayer < HiveTestCase
   end
 
   def test_move_sends_correct_action_to_insect
-    insect = MiniTest::Mock.new
     @game.current_player = @alice
     @game.players = [@alice, @bob]
     @game.turn = 0
 
+    insect = MiniTest::Mock.new
     insect.expect :played?, false
     insect.expect :player, @alice
     insect.expect :send, nil, [:play, [0,0]]
@@ -80,7 +80,6 @@ class TestPlayer < HiveTestCase
   end
 
   def test_move_increments_turn
-    insect = MiniTest::Mock.new
     @game.board = Board.new
     @game.current_player = @alice
     @game.players = [@alice, @bob]
@@ -88,6 +87,7 @@ class TestPlayer < HiveTestCase
 
     @bob.insects << Insect::Base.new(@bob)
 
+    insect = MiniTest::Mock.new
     insect.expect :played?, false
     insect.expect :player, @alice
     insect.expect :send, nil, [:play, [0,0]]
@@ -112,6 +112,8 @@ class TestPlayer < HiveTestCase
     assert_equal [@alice, @bob], @game.players
   end
 
+  def test_legal_insects
+    # TODO
   end
 
   # def test_to_json
