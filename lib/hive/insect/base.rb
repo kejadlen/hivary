@@ -37,9 +37,12 @@ module Hive
         raise QueenNotPlayed if self.game.turn / 2 == 3 and not self.player.queen.played? and not Queen === self
       end
 
-      def valid_placements
-        return [] if self.played?
+      def can_play?
+        self.validate_placement rescue return false
+        true
+      end
 
+      def valid_placements
         spaces = self.board.empty_spaces
 
         return spaces if self.game.turn == 1
@@ -72,9 +75,12 @@ module Hive
         raise OneHiveError if self.breaks_hive?
       end
 
-      def valid_moves
-        return [] unless self.played?
+      def can_move?
+        self.validate_move rescue return false
+        true
+      end
 
+      def valid_moves
         self.neighbors[:spaces].select do |space|
           self.board.neighbors(*space)[:insects].uniq != [self] and
             self.board.can_slide?(self.location, space)

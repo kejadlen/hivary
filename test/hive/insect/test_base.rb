@@ -47,7 +47,7 @@ class TestBase < HiveTestCase
                              @bob => {Base:[[1,0]]})
     @game.turn = 2
     assert_equal [[-1,0], [0,-1], [0,1]], @insect.valid_placements
-    assert_empty @game.board[0,0].valid_placements
+    assert @insect.can_play?
   end
 
   def test_invalid_placement
@@ -58,19 +58,21 @@ class TestBase < HiveTestCase
 
     @game.turn = 6
     assert_raises(QueenNotPlayed) { @insect.play([0,1]) }
+    refute @insect.can_play?
 
     @game.turn = 2
     assert_raises(InvalidLocation) { @insect.play([2,0]) }
+    assert @insect.can_play? # this doesn't check for invalid locations
   end
 
   def test_valid_moves
-    board = Board.load(@alice => {Base:[[0,0]]},
+    board = Board.load(@alice => {Queen:[[0,0]]},
                        @bob => {Base:[[1,0]]})
     @game.board = board
     @game.expect :current_player, @alice
 
     assert_equal [[1,-1], [1,1]], board[0,0].valid_moves
-    assert_empty @insect.valid_moves
+    assert board[0,0].can_move?
   end
 
   def test_invalid_moves
@@ -84,10 +86,12 @@ class TestBase < HiveTestCase
     @game.expect :started?, true
     assert board[0,0].played?
     e = assert_raises(QueenNotPlayed) { board[0,0].move([1,1]) }
+    refute board[0,0].can_move?
 
     @game.expect :started?, true
     board[2,0] = @alice.queen
     assert_raises(InvalidLocation) { board[0,0].move([2,2]) }
+    assert board[0,0].can_move? # this doesn't check for invalid locations
   end
 
   def test_cant_move_even_if_hive_is_relinked
