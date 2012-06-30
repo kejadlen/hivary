@@ -68,6 +68,7 @@ class TestQueen < HiveTestCase
   end
 
   def test_moves_one_tile
+    @alice.insects.delete(@queen)
     board = Board.load(@alice => {Queen:[[0,0]], Ant:[[1,1]],
                                   Spider:[[2,1]], Grasshopper:[[0,-1]],
                                   Beetle:[[2,-1]]},
@@ -81,6 +82,7 @@ class TestQueen < HiveTestCase
   end
 
   def test_cant_move_off_the_hive
+    @alice.insects.delete(@queen)
     board = Board.load(@alice => {Spider:[[0,0]], Ant:[[1,-1]], Queen:[[1,0]]},
                        @bob   => {Queen:[[1,-2]], Grasshopper:[[2,-2]]})
     @game.board = board

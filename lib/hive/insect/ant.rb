@@ -11,7 +11,6 @@ module Hive
         end
         extra_spaces.each {|space| self.board.source.delete(space) }
 
-        # queue = Set[*super.map {|location| self.board[*location] }]
         queue = Set[*super]
         moves = Set.new
 
@@ -27,7 +26,7 @@ module Hive
           moves << move
         end
 
-        extra_spaces.each {|space| self.board.source[space] = Stack.new }
+        extra_spaces.each {|space| self.board.source[space] = Stack.new(*space) }
 
         moves.sort
       end

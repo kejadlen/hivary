@@ -4,13 +4,13 @@ module Hive
   module Insect
     class Spider < Base
       def valid_moves
-        return [] unless self.played?
+        moves = super
+        return moves if moves.empty?
 
         # Remove the spider and don't replace it with an empty space (so
         # it doesn't affect the movement calculation)
         self.board.source.delete(self.location)
 
-        moves = super
         moves &= self.neighbors[:insects].inject([]) {|ary,insect| ary + insect.neighbors[:spaces] }
         moves.select! {|move| self.board.can_slide?(self.location, move) }
         moves.map! {|move| [move] }
