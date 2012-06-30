@@ -12,22 +12,28 @@ module Hive
     class Base
       attr_accessor :player, :stack
 
-      def board; self.player.board; end
-      def breaks_hive?; not Board.one_hive?(self.board.insects.map(&:location) - [self.location]); end
-      def game; self.player.game; end
-      def location; self.stack.location rescue nil; end
-      def played?; !!self.stack; end
+      class << self
+        def json_create(o)
+          self.new(nil)
+        end
+      end
 
       def initialize(player, stack=nil)
         @stack = stack
         @player = player
       end
-
+      
       def to_json(*a)
-        { klass:self.class.to_s.split('::').last, }.to_json(*a)
+        { json_class:self.class.name }.to_json(*a)
       end
       
       def to_s; "<#{self.class.to_s.split('::').last}#{self.location}>"; end
+
+      def board; self.player.board; end
+      def breaks_hive?; not Board.one_hive?(self.board.insects.map(&:location) - [self.location]); end
+      def game; self.player.game; end
+      def location; self.stack.location rescue nil; end
+      def played?; !!self.stack; end
 
       def neighbors; self.board.neighbors(*self.location); end
 
