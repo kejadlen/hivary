@@ -23,8 +23,9 @@ module Hive
       @insects = []
     end
 
-    def to_json(*a)
-      { id:self.object_id, name:self.name, insects:self.insects }.to_json(*a)
+    # def to_json(*a)
+      # { id:self.object_id, name:self.name, insects:self.insects }.to_json(*a)
+    # end
     end
 
     def can_move?

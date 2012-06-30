@@ -112,10 +112,12 @@ class TestPlayer < HiveTestCase
     assert_equal [@alice, @bob], @game.players
   end
 
-  def test_to_json
-    json = JSON.load(@alice.to_json)
-    assert_equal @alice.object_id, json['id']
-    assert_equal 'Alice', json['name']
-    assert_empty json['insects']
   end
+
+  # def test_to_json
+    # json = JSON.load(@alice.to_json)
+    # assert_equal @alice.object_id, json['id']
+    # assert_equal 'Alice', json['name']
+    # assert_empty json['insects']
+  # end
 end
