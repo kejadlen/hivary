@@ -11,16 +11,25 @@ module Hive
     class << self
       NEIGHBORS = [[1,0], [-1,0], [0,1], [0,-1]]
 
-      def load(data)
+      def load(players, data)
         board = self.new
-        board.source.delete([0,0]) # remove the initial empty space
 
-        data.each do |player,insects|
-          insects.each do |klass,locations|
-            locations.each do |location|
-              board[*location] = Insect.const_get(klass).new(player, location)
-              player.insects << board[*location]
-            end
+        json = JSON.load(data)
+        json['source'].each do |location, stack|
+          stack.each do |insect,player|
+            player = players[player]
+            insect = Insect.const_get(insect).new(player)
+            player.insects << insect
+
+            board.source[location] ||= Stack.new(*location)
+            board.source[location] << insect
+            insect.stack = board.source[location]
+          end
+        end
+
+        board.map {|k,_| k }.each do |location|
+          Board.neighbors(*location).each do |neighbor|
+            board.source[neighbor] ||= Stack.new(*neighbor)
           end
         end
 

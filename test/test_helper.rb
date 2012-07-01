@@ -40,30 +40,10 @@ class HiveTestCase < MiniTest::Unit::TestCase
   end
 
   def load_board
-    @board = Board.new
-    @game.board = @board
-
     name = "#{self.class.name.split('::').last}##{self.__name__}.json"
     path = File.join(FIXTURE_PATH, name)
-    return unless File.exists?(path)
 
-    json = JSON.load(File.read(path))
-    json['source'].each do |location, stack|
-      stack.each do |insect,player|
-        player = @players[player]
-        insect = Insect.const_get(insect).new(player)
-        player.insects << insect
-
-        @board.source[location] ||= Stack.new(*location)
-        @board.source[location] << insect
-        insect.stack = @board.source[location]
-      end
-    end
-
-    @board.map {|k,_| k }.each do |location|
-      Board.neighbors(*location).each do |neighbor|
-        @board.source[neighbor] ||= Stack.new(*neighbor)
-      end
-    end
+    @board = (File.exists?(path)) ? Board.load(@players, File.read(path)) : Board.new
+    @game.board = @board
   end
 end
