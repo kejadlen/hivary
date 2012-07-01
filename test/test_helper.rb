@@ -43,7 +43,11 @@ class HiveTestCase < MiniTest::Unit::TestCase
     name = "#{self.class.name.split('::').last}##{self.__name__}.json"
     path = File.join(FIXTURE_PATH, name)
 
-    @board = (File.exists?(path)) ? Board.load(@players, File.read(path)) : Board.new
+    @board = if File.exists?(path)
+               Board.load(@players, JSON.load(File.read(path)))
+             else
+               Board.new
+             end
     @game.board = @board
   end
 end

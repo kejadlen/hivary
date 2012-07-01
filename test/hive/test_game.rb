@@ -42,13 +42,14 @@ class TestGame < HiveTestCase
   end
 
   def test_load
-    game = Game.load({@alice => {Spider:[[0,0]]},
-                      @bob => {Ant:[[0,1]]}},
-                     turn:5)
-    assert_equal [@alice, @bob], game.players
+    game = Game.load({'players' => %w[ Alice Bob ],
+                      'board' => JSON.load(@board.to_json),
+                      'turn' => 5})
+    assert_equal %w[ Alice Bob ], game.players.map(&:name)
     assert_equal 5, game.turn
-    assert_equal 11, @alice.insects.length
-    assert_equal 11, @bob.insects.length
+    game.players.each do |player|
+      assert_equal 11, player.insects.length
+    end
   end
 
   def test_over
@@ -77,14 +78,13 @@ class TestGame < HiveTestCase
     end
   end
 
-  # def test_to_json
-    # self.test_play_ALL_the_insects
+  def test_to_json
+    self.test_play_ALL_the_insects
 
-    # json = JSON.load(@game.to_json)
+    json = JSON.load(@game.to_json)
 
-    # assert_equal @game.object_id, json['id']
-    # assert_equal @game.turn, json['turn']
-    # assert_equal @game.current_player.object_id, json['current_player_id']
-    # assert_equal JSON.load(@game.board.to_json), json['board']
-  # end
+    assert_equal @game.players.map(&:name), json['players']
+    assert_equal JSON.load(@game.board.to_json), json['board']
+    assert_equal @game.turn, json['turn']
+  end
 end

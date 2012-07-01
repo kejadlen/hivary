@@ -14,8 +14,7 @@ module Hive
       def load(players, data)
         board = self.new
 
-        json = JSON.load(data)
-        json['source'].each do |location, stack|
+        data['source'].each do |location, stack|
           stack.each do |insect,player|
             player = players[player]
             insect = Insect.const_get(insect).new(player)

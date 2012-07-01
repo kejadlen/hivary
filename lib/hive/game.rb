@@ -7,47 +7,59 @@ require_relative 'insect/all'
 
 module Hive
   class Game
-    StartInsects = { Insect::Queen => 1,
-                     Insect::Spider => 2,
-                     Insect::Beetle => 2,
-                     Insect::Grasshopper => 3,
-                     Insect::Ant => 3 }
+    START_INSECTS = { Insect::Queen => 1,
+                      Insect::Spider => 2,
+                      Insect::Beetle => 2,
+                      Insect::Grasshopper => 3,
+                      Insect::Ant => 3 }
 
     class << self
-      def load(data, opts={})
-        players = data.keys
-        opts[:expansions] ||= []
+      def load(data)
+        expansions = data['expansions'] || []
+        players = data['players'].map {|name| Player.new(name) }
+        board = Board.load(players, data['board'])
 
-        game = self.new(players, Board.load(data), opts[:turn], opts[:expansions])
+        game = self.new(players,
+                        board,
+                        data['turn'],
+                        expansions)
 
-        players.each do |player|
-          player.game = game
-          game.insects.each do |klass,n|
-            insects = data[player][klass.to_s.split('::').last.to_sym]
-            n -= insects.length rescue 0
-            n.times { player.insects << klass.new(player) }
+        players.each {|player| player.prepare_insects }
+
+        board.each do |_,stack|
+          stack.each do |insect|
+            insect = insect.player.insects.find {|i| i.class == insect.class }
+            insect.player.insects.delete(insect)
           end
         end
-
+        
         game
       end
     end
 
-    attr_reader :board, :insects, :players
-    attr_accessor :turn
-
-    def current_player; self.players.first; end
-
     def initialize(players=[], board=nil, turn=nil, expansions=[])
-      @insects = StartInsects.dup
+      @insects = START_INSECTS.dup
 
       @players = players
+      @players.each {|player| player.game = self }
+
       @board = board || Board.new
       @turn = turn
 
       @insects[Insect::Ladybug] = 1 if expansions.include?(:ladybug)
       @insects[Insect::Mosquito] = 1 if expansions.include?(:mosquito)
     end
+
+    def to_json(*a)
+      { players:self.players.map(&:name),
+        turn:self.turn,
+        board:self.board }.to_json(*a)
+    end
+
+    attr_reader :board, :insects, :players
+    attr_accessor :turn
+
+    def current_player; self.players.first; end
 
     def start
       raise IllegalOperation, 'Game has already started' unless self.turn.nil?
