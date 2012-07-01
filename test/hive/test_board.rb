@@ -109,9 +109,8 @@ class TestBoard < HiveTestCase
   end
 
   def test_to_json
-    game = GameMock.new
-    game.current_player = @alice
-    @players.each {|player| player.game = game }
+    self.setup_game_mock
+    @game.current_player = @alice
 
     board = Board.new
     [[1,0], [1,-1], [1,1]].each do |location|
@@ -122,9 +121,7 @@ class TestBoard < HiveTestCase
     board.source[[0,0]] << beetle
     beetle.stack = board.source[[0,0]]
 
-    board = JSON.load(board.to_json)
-    assert_equal 'Hive::Board', board['klass']
-    source = board['source']
+    source = JSON.load(board.to_json)['source']
     assert_equal [[0,0], [1,-1], [1,0], [1,1]], source.map(&:first).sort
     stack = source.assoc([0,0])[1]
     assert_equal [['Hive::Insect::Base', 1], ['Hive::Insect::Beetle', 0]], stack

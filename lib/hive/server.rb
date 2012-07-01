@@ -26,8 +26,9 @@ module Hive
     class << self
       def insect_from_move(game, insect)
         if insect['location'].nil?
-          game.current_player.insects.find {|i| not i.played? and
-                                    i.class.to_s == insect['klass'] }
+          game.current_player.insects.find do |i|
+            not i.played? and i.class.name.split('::').last == insect['klass']
+          end
         else
           game.board[*insect['location']]
         end

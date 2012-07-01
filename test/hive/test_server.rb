@@ -240,7 +240,7 @@ class TestServer < HiveTestCase
       sockets[0].onreceive do |obj|
         assert_equal 200, obj['status']
         assert_equal @server.games[0].players[1].object_id, obj['body']['id']
-        assert_equal insect.class.to_s, obj['body']['last_move'][0]['klass']
+        assert_equal insect.class.name.split('::').last, obj['body']['last_move'][0]['klass']
         assert_equal nil, obj['body']['last_move'][0]['location']
         assert_equal [0,0], obj['body']['last_move'][1]
 

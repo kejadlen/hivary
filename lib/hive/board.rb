@@ -63,8 +63,7 @@ module Hive
                              (insect.player.current_player?) ? 0 : 1 ] }]
       end
 
-      { klass:self.class,
-        source:source }.to_json(*a)
+      { source:source }.to_json(*a)
     end
 
     def to_s
