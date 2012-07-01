@@ -59,7 +59,7 @@ module Hive
 
     def to_json(*a)
       source = @source.reject {|_,v| v.empty? }.map do |k,v|
-        [k, v.map {|insect| [insect.class,
+        [k, v.map {|insect| [insect.class.name.split('::').last,
                              (insect.player.current_player?) ? 0 : 1 ] }]
       end
 

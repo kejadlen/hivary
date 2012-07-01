@@ -53,7 +53,7 @@ class HiveTestCase < MiniTest::Unit::TestCase
         insect = Insect.const_get(insect).new(player)
         player.insects << insect
 
-        @board.source[location] ||= Stack.new(location)
+        @board.source[location] ||= Stack.new(*location)
         @board.source[location] << insect
         insect.stack = @board.source[location]
       end
@@ -61,7 +61,7 @@ class HiveTestCase < MiniTest::Unit::TestCase
 
     @board.map {|k,_| k }.each do |location|
       Board.neighbors(*location).each do |neighbor|
-        @board.source[neighbor] ||= Stack.new(neighbor)
+        @board.source[neighbor] ||= Stack.new(*neighbor)
       end
     end
   end

@@ -14,14 +14,6 @@ class TestBoard < HiveTestCase
   end
 
   def test_load
-    # board = Board.load(@alice => {Spider:[[0,0]]},
-                       # @bob   => {Ant:[[0,1]]})
-    # self.setup_game_mock
-    # @game.current_player = @alice
-    # name = "#{self.class.name.split('::').last}##{self.__name__}.json"
-    # path = File.join(FIXTURE_PATH, name)
-    # File.open(path, 'w') {|f| f << board.to_json << "\n" }
-
     assert_equal Insect::Spider, @board[0,0].class
     assert_equal Insect::Ant, @board[0,1].class
     assert_equal 10, @board.length
@@ -36,12 +28,9 @@ class TestBoard < HiveTestCase
   end
 
   def test_one_hive
-    board = Board.load(@alice => {Queen:[[0,0]], Ant:[[1,0]], Beetle:[[2,0]]},
-                       @bob   => {Ant:[[1,-1]], Queen:[[3,0]]})
-
-    assert Board.one_hive?(board.insects.map(&:location))
-    board.delete(board[1,0])
-    refute Board.one_hive?(board.insects.map(&:location))
+    assert Board.one_hive?(@board.insects.map(&:location))
+    @board.delete(@board[1,0])
+    refute Board.one_hive?(@board.insects.map(&:location))
   end
 
   def test_assignment
@@ -59,40 +48,33 @@ class TestBoard < HiveTestCase
   end
 
   def test_can_slide
-    self.setup_game_mock
-    board = Board.load(@alice => { Spider:[[0,0]], Queen:[[2,1]] },
-                       @bob   => { Spider:[[1,2]] })
-
-    refute board.can_slide?([1,1], [1,0])
-    assert board.can_slide?([1,1], [0,1])
+    refute @board.can_slide?([1,1], [1,0])
+    assert @board.can_slide?([1,1], [0,1])
   end
 
   def test_remove_empty_spaces
     self.setup_game_mock
-    board = Board.load(@alice => { Queen:[[0,0]], Beetle:[[0,1],[1,1]] },
-                       @bob   => { Queen:[[1,0]], Beetle:[[0,-1],[1,-1]] })
-    @game.board = board
+
+    @game.board = @board
     @game.turn = 10
 
     @game.current_player = @alice
-    board[0,1].move([0,0])
+    @board[0,1].move([0,0])
     
     @game.current_player = @bob
-    board[0,-1].move([0,0])
+    @board[0,-1].move([0,0])
 
     @game.current_player = @alice
-    board[1,1].move([0,0])
+    @board[1,1].move([0,0])
 
     @game.current_player = @bob
-    board[1,-1].move([0,0])
+    @board[1,-1].move([0,0])
 
-    assert_equal 8, board.source.select {|_,v| v.empty? }.length
+    assert_equal 8, @board.source.select {|_,v| v.empty? }.length
   end
 
   def test_neighbors
-    board = Board.load(@alice => { Base:[[1,0], [1,-1], [1,1]] },
-                       @bob   => { Base:[[0,0]] })
-    neighbors = board.neighbors(0,0)
+    neighbors = @board.neighbors(0,0)
 
     assert_equal 3, neighbors[:spaces].length
     assert_equal [[-1,0], [0,-1], [0,1]], neighbors[:spaces]
@@ -101,16 +83,10 @@ class TestBoard < HiveTestCase
   end
 
   def test_to_s
-    alice = MiniTest::Mock.new
-    alice.expect :current_player?, true
-    alice.expect :insects, []
-    bob = MiniTest::Mock.new
-    bob.expect :current_player?, true
-    bob.expect :insects, []
-    board = Board.load(alice => {Spider:[[0,0]]},
-                       bob   => {Ant:[[0,1]]})
-    assert_equal " \e[37mE\e[0m \e[37mE\e[0m\n\e[37mE\e[0m \e[32mA\e[0m \e[37mE\e[0m\n \e[37mE\e[0m \e[32mS\e[0m \e[37mE\e[0m\n  \e[37mE\e[0m \e[37mE\e[0m",
-                 board.to_s
+    self.setup_game_mock
+    @game.current_player = @alice
+
+    assert_equal " \e[37mE\e[0m \e[37mE\e[0m\n\e[37mE\e[0m \e[31mA\e[0m \e[37mE\e[0m\n \e[37mE\e[0m \e[32mS\e[0m \e[37mE\e[0m\n  \e[37mE\e[0m \e[37mE\e[0m", @board.to_s
   end
 
   def test_to_json
@@ -129,6 +105,6 @@ class TestBoard < HiveTestCase
     source = JSON.load(board.to_json)['source']
     assert_equal [[0,0], [1,-1], [1,0], [1,1]], source.map(&:first).sort
     stack = source.assoc([0,0])[1]
-    assert_equal [['Hive::Insect::Base', 1], ['Hive::Insect::Beetle', 0]], stack
+    assert_equal [['Base', 1], ['Beetle', 0]], stack
   end
 end
