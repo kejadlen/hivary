@@ -30,6 +30,7 @@ class HiveTestCase < MiniTest::Unit::TestCase
     @bob = Player.new('Bob')
     @players = [@alice, @bob]
 
+    self.setup_game_mock
     self.load_board
   end
 
@@ -39,12 +40,12 @@ class HiveTestCase < MiniTest::Unit::TestCase
   end
 
   def load_board
+    @board = Board.new
+    @game.board = @board
+
     name = "#{self.class.name.split('::').last}##{self.__name__}.json"
     path = File.join(FIXTURE_PATH, name)
-
     return unless File.exists?(path)
-
-    @board = Board.new
 
     json = JSON.load(File.read(path))
     json['source'].each do |location, stack|

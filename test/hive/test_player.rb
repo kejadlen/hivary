@@ -3,12 +3,6 @@ require 'json'
 require 'test_helper'
 
 class TestPlayer < HiveTestCase
-  def setup
-    super
-
-    self.setup_game_mock
-  end
-
   def test_init
     assert_equal 'Alice', @alice.name
     assert_equal [], @alice.insects

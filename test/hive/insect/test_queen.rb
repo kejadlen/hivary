@@ -4,8 +4,6 @@ class TestQueen < HiveTestCase
   def setup
     super
 
-    self.setup_game_mock
-
     @queen = Insect::Queen.new(@alice)
     @alice.insects << @queen
   end
@@ -21,8 +19,7 @@ class TestQueen < HiveTestCase
   end
 
   def test_can_play_on_turns_2_and_3
-    board = Board.new
-    @game.board = board
+    @game.board = @board
     @game.current_player = @alice
 
     (2..5).each do |turn|
@@ -36,8 +33,7 @@ class TestQueen < HiveTestCase
   end
 
   def test_must_be_played_by_turn_4
-    board = Board.new
-    @game.board = board
+    @game.board = @board
     @game.current_player = @alice
 
     insect = Insect::Base.new(@alice)
@@ -52,13 +48,11 @@ class TestQueen < HiveTestCase
   end
 
   def test_must_be_played_for_other_insects_to_move
-    board = Board.load(@alice => {Base:[[0,0]]},
-                       @bob => {})
-    @game.board = board
+    @game.board = @board
     @game.current_player = @alice
     @game.turn = 2
 
-    base = board[0,0]
+    base = @board[0,0]
 
     assert_raises(QueenNotPlayed) { base.move([1,0]) }
 
@@ -69,26 +63,18 @@ class TestQueen < HiveTestCase
 
   def test_moves_one_tile
     @alice.insects.delete(@queen)
-    board = Board.load(@alice => {Queen:[[0,0]], Ant:[[1,1]],
-                                  Spider:[[2,1]], Grasshopper:[[0,-1]],
-                                  Beetle:[[2,-1]]},
-                       @bob   => {Spider:[[1,2]], Beetle:[[2,0]],
-                                  Grasshopper:[[0,-2]], Ant:[[1,-2]],
-                                  Queen:[[2,-2]]})
-    @game.board = board
+    @game.board = @board
 
-    queen = board[0,0]
+    queen = @board[0,0]
     assert_equal [[-1,0], [0,1], [1,-1], [1,0]], queen.valid_moves
   end
 
   def test_cant_move_off_the_hive
     @alice.insects.delete(@queen)
-    board = Board.load(@alice => {Spider:[[0,0]], Ant:[[1,-1]], Queen:[[1,0]]},
-                       @bob   => {Queen:[[1,-2]], Grasshopper:[[2,-2]]})
-    @game.board = board
+    @game.board = @board
     @game.turn = 2
 
-    queen = board[1,0]
+    queen = @board[1,0]
     assert_equal [[1,1], [2,-1]], queen.valid_moves
   end
 end
