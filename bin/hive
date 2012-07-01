@@ -115,8 +115,6 @@ module Hive
       else
         say('Game started, waiting for opponent to move...')
       end
-
-      @state = :move
     end
 
     ### EventMachine
@@ -133,16 +131,17 @@ module Hive
 
     def receive_object(obj)
       @logger.debug(obj)
+
+      method = obj['method']
       
       if obj['status'] != 200
-        self.send("#{@state}_error".to_sym, obj['body'])
+        self.send("#{method}_error".to_sym, obj['body'])
       else
-        self.send(@state.to_sym, obj['body'])
+        self.send(method.to_sym, obj['body'])
       end
     end
 
     def send_object(obj)
-      @state = obj[:method]
       super(obj)
     end
   end

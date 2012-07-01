@@ -71,9 +71,11 @@ module Hive
 
       timer = EM.add_periodic_timer(1) do
         if game.turn
-          self.send_object({status:200, body:{id:game.current_player.object_id,
-                                              opp_id:self.opponent.object_id,
-                                              last_move:nil}})
+          self.send_object({status:200,
+                            method:'create_game',
+                            body:{id:game.current_player.object_id,
+                                  opp_id:self.opponent.object_id,
+                                  last_move:nil}})
           timer.cancel
         end
         # TODO: should probably add timeout logic at some point here
@@ -111,6 +113,7 @@ module Hive
       self.player.move(insect, location)
 
       self.opponent.connection.send_object({status:200,
+                                            method:'move',
                                             body:{id:self.player.object_id,
                                                   last_move:last_move}})
 
@@ -152,14 +155,14 @@ module Hive
       args = obj['args'] || []
       if AllowedMethods.include?(method)
         result = self.send(method, *args)
-        self.send_object({status:200, body:result})
+        self.send_object({status:200, method:method, body:result})
       else
         self.send_object({status:405})
       end
     rescue ServerError => e
-      self.send_object({status:409, body:e.class.to_s.split('::').last})
+      self.send_object({status:409, method:method, body:e.class.to_s.split('::').last})
     rescue HiveError => e
-      self.send_object({status:409, body:e.class.to_s.split('::').last})
+      self.send_object({status:409, method:method, body:e.class.to_s.split('::').last})
     end
     
     def send_object(obj)
