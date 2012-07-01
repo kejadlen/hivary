@@ -3,9 +3,9 @@ require 'test_helper'
 
 class TestBoard < HiveTestCase
   def setup
-    super
-
     @board = Board.new
+
+    super
   end
 
   def test_init
@@ -14,12 +14,17 @@ class TestBoard < HiveTestCase
   end
 
   def test_load
-    board = Board.load(@alice => {Spider:[[0,0]]},
-                       @bob   => {Ant:[[0,1]]})
+    # board = Board.load(@alice => {Spider:[[0,0]]},
+                       # @bob   => {Ant:[[0,1]]})
+    # self.setup_game_mock
+    # @game.current_player = @alice
+    # name = "#{self.class.name.split('::').last}##{self.__name__}.json"
+    # path = File.join(FIXTURE_PATH, name)
+    # File.open(path, 'w') {|f| f << board.to_json << "\n" }
 
-    assert_equal Insect::Spider, board[0,0].class
-    assert_equal Insect::Ant, board[0,1].class
-    assert_equal 10, board.length
+    assert_equal Insect::Spider, @board[0,0].class
+    assert_equal Insect::Ant, @board[0,1].class
+    assert_equal 10, @board.length
     assert_equal [Insect::Spider], @alice.insects.map(&:class)
   end
 
