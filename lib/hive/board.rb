@@ -53,58 +53,18 @@ module Hive
       end
     end
 
-    def [](*location); self.source[location].top; end
-
-    def []=(*location, insect)
-      self.source[location] ||= Stack.new(*location)
-      self.source[location] << insect
-      insect.stack = self.source[location]
-
-      # Add empty stacks as necesssary
-      Board.neighbors(*location).each do |neighbor|
-        self.source[neighbor] ||= Stack.new(*neighbor)
-      end
-    end
-
-    def initialize
-      @source = { [0,0] => Stack.new(0,0) }
+    def initialize(source=nil)
+      @source = source || { [0,0] => Stack.new(0,0) }
     end
 
     def to_json(*a)
-      @source.reject {|_,v| v.empty? }.to_json(*a)
-    end
-
-    def can_slide?(a, b)
-      return false unless self.source[b].empty?
-      return false unless Board.neighbors(*a).include?(b)
-
-      not (Board.neighbors(*a) & Board.neighbors(*b)).all? do |neighbor|
-        not self.source[neighbor].empty? rescue false
-      end
-    end
-
-    def delete(insect)
-      location = insect.location
-
-      stack = self.source[location]
-      stack.delete(insect)
-
-      self.neighbors(*location)[:spaces].each do |space|
-        self.source.delete(space) if self.neighbors(*space)[:insects].empty?
+      source = @source.reject {|_,v| v.empty? }.map do |k,v|
+        [k, v.map {|insect| [insect.class,
+                             (insect.player.current_player?) ? 0 : 1 ] }]
       end
 
-      # self.source.delete(location) if stack.empty?
-    end
-
-    def empty_spaces; self.select {|_,v| v.empty? }.map {|k,_| k }; end
-    def insects; self.reject {|_,v| v.empty? }.map {|_,v| v.top }; end
-
-    def neighbors(*location)
-      neighbors = Board.neighbors(*location).map do |location|
-        [location, self.source[location]]
-      end
-      spaces,insects = neighbors.select {|_,stack| stack }.partition {|_,stack| stack.empty? }
-      { spaces:spaces.map {|k,_| k }, insects:insects.map {|_,v| v.top } }
+      { klass:self.class,
+        source:source }.to_json(*a)
     end
 
     def to_s
@@ -131,6 +91,50 @@ module Hive
       end
 
       output.chomp
+    end
+
+    def empty_spaces; self.select {|_,v| v.empty? }.map {|k,_| k }; end
+    def insects; self.reject {|_,v| v.empty? }.map {|_,v| v.top }; end
+
+    def [](*location); self.source[location].top; end
+
+    def []=(*location, insect)
+      self.source[location] ||= Stack.new(*location)
+      self.source[location] << insect
+      insect.stack = self.source[location]
+
+      # Add empty stacks as necesssary
+      Board.neighbors(*location).each do |neighbor|
+        self.source[neighbor] ||= Stack.new(*neighbor)
+      end
+    end
+
+    def can_slide?(a, b)
+      return false unless self.source[b].empty?
+      return false unless Board.neighbors(*a).include?(b)
+
+      not (Board.neighbors(*a) & Board.neighbors(*b)).all? do |neighbor|
+        not self.source[neighbor].empty? rescue false
+      end
+    end
+
+    def delete(insect)
+      location = insect.location
+
+      stack = self.source[location]
+      stack.delete(insect)
+
+      self.neighbors(*location)[:spaces].each do |space|
+        self.source.delete(space) if self.neighbors(*space)[:insects].empty?
+      end
+    end
+
+    def neighbors(*location)
+      neighbors = Board.neighbors(*location).map do |location|
+        [location, self.source[location]]
+      end
+      spaces,insects = neighbors.select {|_,stack| stack }.partition {|_,stack| stack.empty? }
+      { spaces:spaces.map {|k,_| k }, insects:insects.map {|_,v| v.top } }
     end
   end
 end

@@ -227,7 +227,6 @@ class TestServer < HiveTestCase
         sockets << sockets.shift if players[0].name != 'alice'
 
         insect = players[0].insects.reject {|insect| Insect::Queen === insect }.sample
-        # sockets[0].send_object({method:'move', args:[insect.object_id, [0,0]]})
         sockets[0].send_object({method:'move', args:[insect, [0,0]]})
       end
 

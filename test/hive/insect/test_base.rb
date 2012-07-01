@@ -135,16 +135,12 @@ class TestBase < HiveTestCase
   end
 
   def test_to_json
-    json = @insect.to_json
-    assert_equal '{"json_class":"Hive::Insect::Base"}', json
+    insect = JSON.load(@insect.to_json)
+    assert_equal 'Hive::Insect::Base', insect['klass']
+    assert_nil insect['location']
 
-    insect = JSON.load(json)
-    assert_equal Hive::Insect::Base, insect.class
-    assert_nil insect.player
-
-    ant = Insect::Ant.new(@bob)
-    ant = JSON.load(ant.to_json)
-    assert_equal Hive::Insect::Ant, ant.class
-    assert_nil ant.player
+    ant = JSON.load(Insect::Ant.new(@bob).to_json)
+    assert_equal 'Hive::Insect::Ant', ant['klass']
+    assert_nil insect['location']
   end
 end
