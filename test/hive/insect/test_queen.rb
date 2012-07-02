@@ -60,10 +60,19 @@ class TestQueen < HiveTestCase
 
   def test_cant_move_off_the_hive
     @alice.insects.delete(@queen)
-    @game.board = @board
     @game.turn = 2
 
     queen = @board[1,0]
     assert_equal [[1,1], [2,-1]], queen.valid_moves
+  end
+
+  def test_surrounded
+    @alice.insects.delete(@queen)
+
+    assert @alice.queen.surrounded?
+
+    @board.source[[0,0]] << Insect::Beetle.new(@bob)
+
+    assert @alice.queen.surrounded?
   end
 end
