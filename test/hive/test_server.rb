@@ -263,6 +263,21 @@ class TestServer < HiveTestCase
     assert_empty @server.users
   end
 
+  def test_game
+    em do
+      self.load_board('TestGrasshopper#test_jumps_in_straight_lines.json')
+      game = Game.new(@players, @board)
+      @server.games << game
+
+      @alice.send_object({method:'game', args:[game.object_id]})
+      @alice.onreceive do |obj|
+        assert_equal 200, obj['status']
+        assert_equal game.to_json, obj['body']['game']
+        stop
+      end
+    end
+  end
+
   # TODO
   def test_game_over
   end

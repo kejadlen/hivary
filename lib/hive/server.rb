@@ -56,7 +56,7 @@ module Hive
     attr_accessor :server
     attr_accessor :name, :opponent
 
-    AllowedMethods = %w[ create_game games join_game move register unregister ]
+    AllowedMethods = %w[ create_game game games join_game move register unregister ]
 
     def logger; self.server.logger; end
     def player; self.server.users[self.name]; end
@@ -82,6 +82,13 @@ module Hive
       end
 
       {id:game.object_id}
+    end
+
+    def game(game_id)
+      game = self.server.games.find {|game| game.object_id == game_id }
+      raise NoGameError if game.nil?
+
+      {game:game.to_json}
     end
 
     def games
