@@ -9,10 +9,10 @@ class TestPlayer < HiveTestCase
   end
 
   def test_current_player
-    @game.current_player = 0
+    @game.players = [@bob, @alice]
     refute @alice.current_player?
 
-    @game.current_player = @alice
+    @game.players = [@alice, @bob]
     assert @alice.current_player?
   end
 
@@ -31,7 +31,6 @@ class TestPlayer < HiveTestCase
 
   def test_prepare_insects
     @game.expect :insects, {Insect::Base => 2}
-    @alice.game = @game
 
     @alice.prepare_insects
 
@@ -48,15 +47,13 @@ class TestPlayer < HiveTestCase
 
     assert_raises(GameNotStarted) { @alice.validate_action }
 
-    @game.turn = 0
     @game.players = [@bob, @alice]
+    @game.turn = 0
 
     assert_raises(InvalidTurn) { @alice.validate_action }
   end
 
   def test_move_sends_correct_action_to_insect
-    @game.current_player = @alice
-    @game.players = [@alice, @bob]
     @game.turn = 0
 
     insect = MiniTest::Mock.new
@@ -75,8 +72,6 @@ class TestPlayer < HiveTestCase
 
   def test_move_increments_turn
     @game.board = Board.new
-    @game.current_player = @alice
-    @game.players = [@alice, @bob]
     @game.turn = 0
 
     @bob.insects << Insect::Base.new(@bob)
@@ -92,12 +87,10 @@ class TestPlayer < HiveTestCase
   end
 
   def test_skip_turn_with_no_moves
-    insect = MiniTest::Mock.new
     @game.board = Board.new
-    @game.current_player = @alice
-    @game.players = [@alice, @bob]
     @game.turn = 0
 
+    insect = MiniTest::Mock.new
     insect.expect :played?, false
     insect.expect :player, @alice
     insect.expect :send, nil, [:play, [0,0]]

@@ -2,25 +2,20 @@ require 'test_helper'
 
 class TestBeetle < HiveTestCase
   def test_normal_movement
-    @game.board = @board
-
     beetle = @board[0,0]
     refute_includes beetle.valid_moves, [1,1]
   end
 
   def test_one_hive
+    # TODO
   end
 
   def test_can_climb_onto_hive
-    @game.board = @board
-
     beetle = @board[1,0]
     assert_equal [[0,0], [1,-1], [1,1], [2,-1]], beetle.valid_moves.sort
   end
 
   def test_covers_insects
-    @game.board = @board
-    @game.current_player = @alice
     @game.turn = 0
 
     beetle = @board[1,0]
@@ -43,8 +38,6 @@ class TestBeetle < HiveTestCase
   end
 
   def test_covered_insect_cant_move
-    @game.board = @board
-    @game.current_player = @alice
     @game.turn = 0
 
     insect = @board[0,0]
@@ -56,22 +49,20 @@ class TestBeetle < HiveTestCase
   end
 
   def test_stack_multiple_beetles
-    @game.board = @board
     @game.turn = 11
 
-    @game.current_player = @alice
     @board[0,1].move([0,0])
     assert_equal @alice, @board[0,0].player
     
-    @game.current_player = @bob
+    @game.players = [@bob, @alice]
     @board[0,-1].move([0,0])
     assert_equal @bob, @board[0,0].player
 
-    @game.current_player = @alice
+    @game.players = [@alice, @bob]
     @board[1,1].move([0,0])
     assert_equal @alice, @board[0,0].player
 
-    @game.current_player = @bob
+    @game.players = [@bob, @alice]
     @board[1,-1].move([0,0])
     assert_equal @bob, @board[0,0].player
 

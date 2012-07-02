@@ -15,8 +15,9 @@ class MiniTest::Mock
 end
 
 class GameMock < MiniTest::Mock
-  attr_accessor :board, :current_player, :players, :turn
+  attr_accessor :board, :players, :turn
 
+  def current_player; self.players.first; end
   def over?; false; end
 end
 
@@ -36,6 +37,7 @@ class HiveTestCase < MiniTest::Unit::TestCase
 
   def setup_game_mock
     @game = GameMock.new
+    @game.players = @players
     @players.each {|player| player.game = @game }
   end
 

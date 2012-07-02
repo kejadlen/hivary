@@ -53,21 +53,17 @@ class TestBoard < HiveTestCase
   end
 
   def test_remove_empty_spaces
-    self.setup_game_mock
-
-    @game.board = @board
     @game.turn = 10
 
-    @game.current_player = @alice
     @board[0,1].move([0,0])
     
-    @game.current_player = @bob
+    @game.players = [@bob, @alice]
     @board[0,-1].move([0,0])
 
-    @game.current_player = @alice
+    @game.players = [@alice, @bob]
     @board[1,1].move([0,0])
 
-    @game.current_player = @bob
+    @game.players = [@bob, @alice]
     @board[1,-1].move([0,0])
 
     assert_equal 8, @board.source.select {|_,v| v.empty? }.length
@@ -83,16 +79,10 @@ class TestBoard < HiveTestCase
   end
 
   def test_to_s
-    self.setup_game_mock
-    @game.current_player = @alice
-
     assert_equal " \e[37mE\e[0m \e[37mE\e[0m\n\e[37mE\e[0m \e[31mA\e[0m \e[37mE\e[0m\n \e[37mE\e[0m \e[32mS\e[0m \e[37mE\e[0m\n  \e[37mE\e[0m \e[37mE\e[0m", @board.to_s
   end
 
   def test_to_json
-    self.setup_game_mock
-    @game.current_player = @alice
-
     board = Board.new
     [[1,0], [1,-1], [1,1]].each do |location|
       board[*location] = Insect::Base.new(@alice)

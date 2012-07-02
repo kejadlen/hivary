@@ -15,7 +15,6 @@ class TestBase < HiveTestCase
   end
 
   def test_can_play_next_to_opponent_on_second_turn
-    @game.board = @board
     @game.turn = 1
 
     refute_empty @insect.valid_placements
@@ -27,7 +26,6 @@ class TestBase < HiveTestCase
   end
 
   def test_can_play_into_surrounded_space
-    @game.board = @board
     @game.turn = 2
 
     assert_includes Insect::Spider.new(@alice).valid_placements, [0,0]
@@ -35,15 +33,12 @@ class TestBase < HiveTestCase
   end
 
   def test_valid_placements
-    @game.board = @board
     @game.turn = 2
     assert_equal [[-1,0], [0,-1], [0,1]], @insect.valid_placements
     assert @insect.can_play?
   end
 
   def test_invalid_placement
-    @game.board = @board
-    @game.current_player = @alice
     @alice.insects << Insect::Queen.new(@alice)
 
     @game.turn = 6
@@ -56,16 +51,11 @@ class TestBase < HiveTestCase
   end
 
   def test_valid_moves
-    @game.board = @board
-    @game.expect :current_player, @alice
-
     assert_equal [[1,-1], [1,1]], @board[0,0].valid_moves
     assert @board[0,0].can_move?
   end
 
   def test_invalid_moves
-    @game.board = @board
-    @game.current_player = @alice
     @game.turn = 0
     @alice.insects << Insect::Queen.new(@alice)
 
@@ -81,8 +71,6 @@ class TestBase < HiveTestCase
   end
 
   def test_cant_move_even_if_hive_is_relinked
-    @game.board = @board
-
     assert_raises(OneHiveError) { @alice.queen.validate_move }
   end
 
@@ -91,8 +79,6 @@ class TestBase < HiveTestCase
   end
 
   def test_freedom_to_move_out
-    @game.board = @board
-    @game.current_player = @alice
     @game.turn = 0
 
     ant = @board[1,0]
@@ -106,8 +92,6 @@ class TestBase < HiveTestCase
   end
 
   def test_play
-    @game.board = @board
-    @game.current_player = @alice
     @game.turn = 2
     @insect.play([0,-1])
     assert_equal @insect, @board[0,-1]
