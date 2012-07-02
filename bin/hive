@@ -56,6 +56,21 @@ module Hive
         insect = @body['last_move'][0]
         insect = Server.insect_from_move(game, insect)
         game.current_player.move(insect, @body['last_move'][1])
+
+        if game.over?
+          say('Game over!')
+
+          winner = game.players.delete_if {|player| player.queen.surrounded? }
+          if winner.empty?
+            say("Tie - both queens are surrounded!")
+          elsif winner[0] == @player
+            say("You win!")
+          else
+            say("You lose!")
+          end
+
+          exit
+        end
       end
     end
 
@@ -106,9 +121,7 @@ module Hive
       [@player, opponent].each {|player| player.join_game(game) }
       game.start
 
-      if game.current_player.name != @body['id']
-        game.players << game.players.shift
-      end
+      game.players << game.players.shift if game.current_player.name != @body['id']
 
       if @body['last_move'].nil?
         self.move
