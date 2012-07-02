@@ -13,25 +13,25 @@ require 'hive/server'
 
 module Hive
   class Client < EM::Connection
-    def create_game(body)
-      if body.include?('last_move')
-        self.start_game(body)
+    def create_game
+      if @body.include?('last_move')
+        self.start_game
       else
         say('Waiting for an opponent...')
       end
     end
 
-    def create_game_error(body)
-      say("[#{body}] - could not create game.")
+    def create_game_error
+      say("[#@body] - could not create game.")
       self.send_object({method:'games'})
     end
 
-    def games(body)
+    def games
       choose do |menu|
         menu.choice('Refresh list of games') do
           self.send_object({method:'games'})
         end
-        body.each do |game_id,name|
+        @body.each do |game_id,name|
           menu.choice("#{game_id} (#{name})") do
             self.send_object({method:'join_game', args:[game_id]})
           end
@@ -42,25 +42,25 @@ module Hive
       end
     end
 
-    def join_game(body)
-      self.start_game(body)
+    def join_game
+      self.start_game
     end
 
-    def join_game_error(body)
+    def join_game_error
     end
 
-    def play_last_move(body)
+    def play_last_move
       game = @player.game
 
-      if body['last_move']
-        insect = body['last_move'][0]
+      if @body['last_move']
+        insect = @body['last_move'][0]
         insect = Server.insect_from_move(game, insect)
-        game.current_player.move(insect, body['last_move'][1])
+        game.current_player.move(insect, @body['last_move'][1])
       end
     end
 
-    def move(body)
-      self.play_last_move(body)
+    def move
+      self.play_last_move
 
       if @player.current_player?
         insects = @player.legal_insects
@@ -85,33 +85,33 @@ module Hive
       end
     end
 
-    def move_error(body)
-      say("Error: #{body}")
+    def move_error
+      say("Error: #@body")
       self.move({})
     end
 
-    def register(body)
-      @player = Player.new(body['id'])
+    def register
+      @player = Player.new(@body['id'])
       self.send_object({method:'games'})
     end
 
-    def register_error(body)
-      name = ask("[#{body}] Name? ")
+    def register_error
+      name = ask("[#@body] Name? ")
       self.send_object({method:'register', args:[name]})
     end
 
-    def start_game(body)
+    def start_game
       game = Game.new
-      opponent = Player.new(body['opp_id'])
+      opponent = Player.new(@body['opp_id'])
       [@player, opponent].each {|player| player.join_game(game) }
       game.start
 
-      if game.current_player.name != body['id']
+      if game.current_player.name != @body['id']
         game.players << game.players.shift
       end
 
-      if body['last_move'].nil?
-        self.move(body)
+      if @body['last_move'].nil?
+        self.move
       else
         say('Game started, waiting for opponent to move...')
       end
@@ -133,11 +133,12 @@ module Hive
       @logger.debug(obj)
 
       method = obj['method']
+      @body = obj['body']
       
       if obj['status'] != 200
-        self.send("#{method}_error".to_sym, obj['body'])
+        self.send("#{method}_error".to_sym)
       else
-        self.send(method.to_sym, obj['body'])
+        self.send(method.to_sym)
       end
     end
 
