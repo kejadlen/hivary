@@ -35,7 +35,7 @@ module Hive
       end
     end
 
-    def initialize(opts)
+    def initialize(opts={})
       @ip = opts.fetch(:ip, '0.0.0.0')
       @port = opts.fetch(:port, 3000)
       
@@ -84,7 +84,7 @@ module Hive
         # TODO: should probably add timeout logic at some point here
       end
 
-      {id:game.object_id}
+      { id:game.object_id }
     end
 
     def game(game_id)
@@ -185,6 +185,8 @@ module Hive
     end
 
     def unbind
+      return unless self.player
+
       self.logger.info("unbinding #{self.name}")
 
       # TODO: Allow users to rejoin games
