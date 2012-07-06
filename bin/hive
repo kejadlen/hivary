@@ -14,11 +14,7 @@ require 'hive/server'
 module Hive
   class Client < EM::Connection
     def create_game
-      if @body.include?('last_move')
-        self.start_game
-      else
-        say('Waiting for an opponent...')
-      end
+      self.send_object({method:'join_game', args:[@body['id']]})
     end
 
     def create_game_error
@@ -43,7 +39,11 @@ module Hive
     end
 
     def join_game
-      self.start_game
+      if @body.include?('opp_id')
+        self.start_game
+      else
+        say('Waiting for an opponent...')
+      end
     end
 
     def join_game_error
@@ -76,7 +76,16 @@ module Hive
 
     def move
       self.play_last_move
+      next_move = self.next_move
+      self.send_object({method:'move', args:next_move}) if next_move
+    end
 
+    def move_error
+      say("Error: #@body")
+      self.move({})
+    end
+
+    def next_move
       if @player.current_player?
         insects = @player.legal_insects
 
@@ -98,7 +107,7 @@ module Hive
 
                 chr = 'a'
                 ary.each do |x,y|
-                  rows.assoc(y).last[x] = "\e[34m#{chr}\e[0m"
+                  rows.assoc(y).last[x] = "\e[1;33m#{chr}\e[0m"
                   chr.succ!
                 end
 
@@ -115,7 +124,7 @@ module Hive
 
                 ary.each do |location|
                   submenu.choice(location) do
-                    self.send_object({method:'move', args:[insect, location]})
+                    return [insect, location]
                   end
                 end
               end
@@ -125,11 +134,8 @@ module Hive
       else
         say('Waiting for opponent to move...')
       end
-    end
 
-    def move_error
-      say("Error: #@body")
-      self.move({})
+      nil
     end
 
     def register
@@ -170,7 +176,7 @@ module Hive
     end
 
     def receive_object(obj)
-      @logger.debug(obj)
+      @logger.debug("received object #{obj}")
 
       method = obj['method']
       @body = obj['body']
@@ -183,7 +189,30 @@ module Hive
     end
 
     def send_object(obj)
+      @logger.debug("sending object #{obj}")
+
       super(obj)
+    end
+
+    def unbind
+      say('Disconnected')
+      exit
+    end
+  end
+
+  class AI < Client
+    def move
+      self.play_last_move
+
+      if @player.current_player?
+        insect,locations = @player.legal_insects.sample
+        location = locations.sample
+        self.send_object({method:'move', args:[insect, location]})
+      end
+    end
+
+    def register
+      @player = Player.new(@body['id'])
     end
   end
 end
@@ -192,7 +221,7 @@ class HiveApp < Thor
   desc 'server', ''
   method_option :port, :default => 3000
   def server
-    EM::run do
+    EM.run do
       s = Hive::Server.new(:port => options[:port])
       s.logger = Logger.new(STDOUT)
       s.logger.level = Logger::INFO
@@ -207,6 +236,17 @@ class HiveApp < Thor
     EM.run do
       client = EM.connect(options[:host], options[:port], Hive::Client)
       client.send_object({method:'register', args:[name]})
+    end
+  end
+
+  desc 'ai GAME_ID', ''
+  method_option :host, :default => '0.0.0.0'
+  method_option :port, :default => 3000
+  def ai(game_id)
+    EM.run do
+      ai = EM.connect(options[:host], options[:port], Hive::AI)
+      ai.send_object({method:'register', args:['HAL']})
+      ai.send_object({method:'join_game', args:[game_id.to_i]})
     end
   end
 end

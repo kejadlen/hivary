@@ -70,20 +70,6 @@ module Hive
       game = Game.new
       self.server.games << game
 
-      self.player.join_game(game)
-
-      timer = EM.add_periodic_timer(1) do
-        if game.turn
-          self.send_object({status:200,
-                            method:'create_game',
-                            body:{id:game.current_player.object_id,
-                                  opp_id:self.opponent.object_id,
-                                  last_move:nil}})
-          timer.cancel
-        end
-        # TODO: should probably add timeout logic at some point here
-      end
-
       { id:game.object_id }
     end
 
@@ -96,7 +82,8 @@ module Hive
 
     def games
       self.server.games.map do |game|
-        [game.object_id, game.players[0].name]
+        player = game.players[0].name rescue ''
+        [game.object_id, name]
       end
     end
 
@@ -104,13 +91,23 @@ module Hive
       game = self.server.games.find {|game| game.object_id == game_id }
       raise NoGameError if game.nil?
 
-      self.opponent = game.players[0]
-      self.opponent.connection.opponent = self.player
-
       self.player.join_game(game)
-      game.start
 
-      {id:game.current_player.object_id, opp_id:self.opponent.object_id}
+      if game.players.length == 2
+        self.opponent = game.players[0]
+        self.opponent.connection.opponent = self.player
+
+        game.start
+
+        self.opponent.connection.send_object({ status:200,
+                                               method:'join_game',
+                                               body:{ id:game.current_player.object_id,
+                                                      opp_id:self.opponent.object_id }})
+      end
+
+      hash = { id: game.current_player.object_id }
+      hash[:opp_id] = self.opponent.object_id if self.opponent
+      hash
     end
 
     def move(*last_move)
