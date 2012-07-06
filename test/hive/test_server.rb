@@ -149,19 +149,6 @@ class TestServer < HiveTestCase
     end
   end
 
-  def test_create_game_error
-    em do
-      bob = EM.connect('0.0.0.0', 3000, FakeSocketClient)
-
-      bob.send_object({method:'create_game'})
-      bob.onreceive do |obj|
-        assert_equal 409, obj['status']
-        assert_equal 'NotRegisteredError', obj['body']
-        stop
-      end
-    end
-  end
-
   def test_join_game
     em(2) do
       bob = EM.connect('0.0.0.0', 3000, FakeSocketClient)

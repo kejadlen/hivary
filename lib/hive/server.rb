@@ -65,8 +65,6 @@ module Hive
     def player; self.server.users[self.name]; end
 
     def create_game
-      raise NotRegisteredError if self.player.nil?
-
       game = Game.new
       self.server.games << game
 
