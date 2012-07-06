@@ -89,27 +89,21 @@ module Hive
               choose do |submenu|
                 submenu.index = :letter
 
-                min_x = 0 # so each row can be offset correctly
-                rows = Hash.new {|h,k| h[k] = Hash.new } # remapping the source to be indexed by coordinates
-
-                # Get a row-by-row hash of the board, storing each tile as a colored letter
-                @player.game.board.source.each do |location,stack|
-                  i = stack.top
-                  min_x = [min_x, location[0]].min
-
-                  color = (i.nil?) ? 37 : (i.player.current_player?) ? 32 : 31
-                  letter = (i.nil?) ? 'E' : i.class.to_s.split('::').last[0]
-                  rows[location[1]][location[0]] = "\e[#{color}m#{letter}\e[0m"
+                min_x = @player.game.board.min_x
+                rows = @player.game.board.to_a do |insect|
+                  color = (insect.nil?) ? 37 : (insect.player.current_player?) ? 32 : 31
+                  letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0]
+                  "\e[#{color}m#{letter}\e[0m"
                 end
 
                 chr = 'a'
                 ary.each do |x,y|
-                  rows[y][x] = "\e[34m#{chr}\e[0m"
+                  rows.assoc(y).last[x] = "\e[34m#{chr}\e[0m"
                   chr.succ!
                 end
 
                 # Transform the hash into the output string
-                output = rows.sort_by {|k,_| k }.reverse.inject('') do |n,(i,row)|
+                output = rows.inject('') do |n,(i,row)|
                   # Fill in the empty spaces
                   row = Array.new(row.keys.max - min_x + 1) {|j| row[j+min_x] or ' ' }
 
