@@ -84,8 +84,41 @@ module Hive
 
         choose do |menu|
           insects.each do |insect,ary|
+            ary.sort!
             menu.choice(insect) do
               choose do |submenu|
+                submenu.index = :letter
+
+                min_x = 0 # so each row can be offset correctly
+                rows = Hash.new {|h,k| h[k] = Hash.new } # remapping the source to be indexed by coordinates
+
+                # Get a row-by-row hash of the board, storing each tile as a colored letter
+                @player.game.board.source.each do |location,stack|
+                  i = stack.top
+                  min_x = [min_x, location[0]].min
+
+                  color = (i.nil?) ? 37 : (i.player.current_player?) ? 32 : 31
+                  letter = (i.nil?) ? 'E' : i.class.to_s.split('::').last[0]
+                  rows[location[1]][location[0]] = "\e[#{color}m#{letter}\e[0m"
+                end
+
+                chr = 'a'
+                ary.each do |x,y|
+                  rows[y][x] = "\e[34m#{chr}\e[0m"
+                  chr.succ!
+                end
+
+                # Transform the hash into the output string
+                output = rows.sort_by {|k,_| k }.reverse.inject('') do |n,(i,row)|
+                  # Fill in the empty spaces
+                  row = Array.new(row.keys.max - min_x + 1) {|j| row[j+min_x] or ' ' }
+
+                n << ' ' if i % 2 == 0 # offset for even rows
+                n << row.join(' ') << "\n"
+                end
+
+                say(output.chomp)
+
                 ary.each do |location|
                   submenu.choice(location) do
                     self.send_object({method:'move', args:[insect, location]})
@@ -163,9 +196,10 @@ end
 
 class HiveApp < Thor
   desc 'server', ''
+  method_option :port, :default => 3000
   def server
     EM::run do
-      s = Hive::Server.new
+      s = Hive::Server.new(:port => options[:port])
       s.logger = Logger.new(STDOUT)
       s.logger.level = Logger::INFO
       s.start

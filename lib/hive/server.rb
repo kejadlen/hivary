@@ -35,14 +35,17 @@ module Hive
       end
     end
 
-    def initialize
+    def initialize(opts)
+      @ip = opts.fetch(:ip, '0.0.0.0')
+      @port = opts.fetch(:port, 3000)
+      
       @logger = Logger.new('/dev/null')
       @games = []
       @users = {}
     end
 
-    def start(ip='0.0.0.0', port=3000)
-      @instance = EM.start_server(ip, port, Connection) do |con|
+    def start
+      @instance = EM.start_server(@ip, @port, Connection) do |con|
         con.server = self
       end
     end
@@ -182,9 +185,11 @@ module Hive
     end
 
     def unbind
-      self.server.users.delete(self.name)
+      self.logger.info("unbinding #{self.name}")
+
       # TODO: Allow users to rejoin games
       self.server.games.delete_if {|game| game.players.include?(self.player) }
+      self.server.users.delete(self.name)
     end
   end
 end
