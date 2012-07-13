@@ -41,6 +41,12 @@ class HiveTestCase < MiniTest::Unit::TestCase
     @players.each {|player| player.game = @game }
   end
 
+  def save_board
+    name ||= "#{self.class.name.split('::').last}##{self.__name__}.json"
+    path = File.join(FIXTURE_PATH, name)
+    File.open(path, 'w') {|f| f << @board.to_json }
+  end
+
   def load_board(name=nil)
     name ||= "#{self.class.name.split('::').last}##{self.__name__}.json"
     path = File.join(FIXTURE_PATH, name)
