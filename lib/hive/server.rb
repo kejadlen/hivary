@@ -59,10 +59,10 @@ module Hive
     attr_accessor :server
     attr_accessor :name, :opponent
 
-    AllowedMethods = %w[ create_game game games join_game move register unregister ]
+    ALLOWED_METHODS = %w[ create_game game games join_game move register unregister ]
 
     def logger; self.server.logger; end
-    def player; self.server.users[self.name]; end
+    def player; Maybe(self.server.users[self.name]); end
 
     def create_game
       game = Game.new
@@ -80,7 +80,7 @@ module Hive
 
     def games
       self.server.games.map do |game|
-        player = game.players[0].name rescue ''
+        name = game.players[0].name rescue ''
         [game.object_id, name]
       end
     end
@@ -100,7 +100,7 @@ module Hive
         self.opponent.connection.send_object({ status:200,
                                                method:'join_game',
                                                body:{ id:game.current_player.object_id,
-                                                      opp_id:self.opponent.object_id }})
+                                                      opp_id:self.object_id }})
       end
 
       hash = { id: game.current_player.object_id }
@@ -158,7 +158,7 @@ module Hive
 
       method = obj['method']
       args = obj['args'] || []
-      if AllowedMethods.include?(method)
+      if ALLOWED_METHODS.include?(method)
         result = self.send(method, *args)
         self.send_object({status:200, method:method, body:result})
       else
