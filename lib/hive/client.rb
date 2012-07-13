@@ -30,7 +30,6 @@ module Hive
 
       game.players << game.players.shift if game.current_player.name != @body['id']
 
-      self.game_over if game.over?
       self.make_move if @player.current_player?
     end
 
@@ -54,6 +53,7 @@ module Hive
       insect = Server.insect_from_move(game, last_move[0])
       game.current_player.move(insect, last_move[1])
 
+      self.game_over if game.over?
       self.make_move
     end
 
@@ -159,37 +159,15 @@ module Hive
       say(@player.game.board.to_s)
 
       choose do |menu|
-        insects.each do |insect,ary|
-          ary.sort!
+        insects.each do |insect,locations|
+          locations.sort!
           menu.choice(insect) do
             choose do |submenu|
               submenu.index = :letter
 
-              min_x = @player.game.board.min_x
-              rows = @player.game.board.to_a do |insect|
-                color = (insect.nil?) ? 37 : (insect.player.current_player?) ? 32 : 31
-                letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0]
-                "\e[#{color}m#{letter}\e[0m"
-              end
+              self.print_board(insect, locations)
 
-              chr = 'a'
-              ary.each do |x,y|
-                rows.assoc(y).last[x] = "\e[1;33m#{chr}\e[0m"
-                chr.succ!
-              end
-
-              # Transform the hash into the output string
-              output = rows.inject('') do |n,(i,row)|
-                # Fill in the empty spaces
-                row = Array.new(row.keys.max - min_x + 1) {|j| row[j+min_x] or ' ' }
-
-              n << ' ' if i % 2 == 0 # offset for even rows
-              n << row.join(' ') << "\n"
-              end
-
-              say(output.chomp)
-
-              ary.each do |location|
+              locations.each do |location|
                 submenu.choice(location) do
                   self.move(insect, location)
                 end
@@ -198,6 +176,32 @@ module Hive
           end
         end
       end
+    end
+
+    def print_board(insect, locations)
+      min_x = @player.game.board.min_x
+      rows = @player.game.board.to_a do |insect|
+        color = (insect.nil?) ? 37 : (insect.player.current_player?) ? 32 : 31
+        letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0]
+        "\e[#{color}m#{letter}\e[0m"
+      end
+
+      index = 'a'
+      locations.each do |x,y|
+        rows.assoc(y).last[x] = "\e[1;33m#{index}\e[0m"
+        index.succ!
+      end
+
+      # Transform the hash into the output string
+      output = rows.inject('') do |n,(i,row)|
+        # Fill in the empty spaces
+        row = Array.new(row.keys.max - min_x + 1) {|j| row[j+min_x] or ' ' }
+
+      n << ' ' if i % 2 == 0 # offset for even rows
+      n << row.join(' ') << "\n"
+      end
+
+      say(output.chomp)
     end
   end
 end
