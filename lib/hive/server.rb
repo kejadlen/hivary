@@ -100,10 +100,10 @@ module Hive
         self.opponent.connection.send_object({ status:200,
                                                method:'join_game',
                                                body:{ id:game.current_player.object_id,
-                                                      opp_id:self.object_id }})
+                                                      opp_id:self.player.object_id }})
       end
 
-      hash = { id: game.current_player.object_id }
+      hash = { id:game.current_player.object_id }
       hash[:opp_id] = self.opponent.object_id if self.opponent
       hash
     end

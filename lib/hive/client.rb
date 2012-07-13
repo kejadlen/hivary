@@ -148,6 +148,18 @@ module Hive
       end
     end
 
+    def game_over
+      winner = game.players.delete_if {|player| player.queen.surrounded? }
+
+      if winner.empty?
+        say("Tie - both queens are surrounded!")
+      elsif winner[0] == @player
+        say("You win!")
+      else
+        say("You lose!")
+      end
+    end
+
     def make_move
       unless @player.current_player?
         say('Waiting for opponent to move...')
@@ -172,6 +184,8 @@ module Hive
                   self.move(insect, location)
                 end
               end
+
+              submenu.choice('Cancel') { self.make_move }
             end
           end
         end
