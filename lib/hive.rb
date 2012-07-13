@@ -1,6 +1,10 @@
-require_relative 'hive/board'
-require_relative 'hive/game'
-require_relative 'hive/player'
+module Hive
+  class HiveError < StandardError; end
+end
+
+require 'hive/board'
+require 'hive/game'
+require 'hive/player'
 
 module Hive
   class IllegalOperation < StandardError; end

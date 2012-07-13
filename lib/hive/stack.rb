@@ -1,6 +1,6 @@
 require 'delegate'
 
-require_relative '../hive'
+require 'hive'
 
 module Hive
   class Stack < Delegator

@@ -22,7 +22,7 @@ class TestBase < HiveTestCase
     @board[1,1] = Insect::Base.new(@alice)
     @game.turn = 3
 
-    assert_equal [[2,1], [0,2], [1,2]], @insect.valid_placements
+    assert_equal [[1,2], [2,1], [0,2]], @insect.valid_placements
   end
 
   def test_can_play_into_surrounded_space
@@ -34,7 +34,7 @@ class TestBase < HiveTestCase
 
   def test_valid_placements
     @game.turn = 2
-    assert_equal [[-1,0], [0,1], [0,-1]], @insect.valid_placements
+    assert_equal [[0,-1], [-1,0], [0,1]], @insect.valid_placements
     assert @insect.can_play?
   end
 

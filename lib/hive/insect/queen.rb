@@ -1,4 +1,4 @@
-require_relative 'base'
+require 'hive/insect/base'
 
 module Hive
   module Insect

@@ -1,6 +1,6 @@
 require 'json'
 
-require_relative 'hive'
+require 'hive/hive'
 
 module Hive
   class InvalidGame < HiveError; end
@@ -24,7 +24,7 @@ module Hive
     end
 
     def to_json(*a)
-      { id:self.object_id, name:self.name, insects:self.insects }.to_json(*a)
+      { :id => self.object_id, :name => self.name, :insects => self.insects }.to_json(*a)
     end
 
     def legal_insects

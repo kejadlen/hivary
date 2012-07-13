@@ -23,7 +23,7 @@ class TestBeetle < HiveTestCase
 
     beetle.move([1,-1])
     
-    assert_equal [ant, beetle], @board.source[[1,-1]]
+    assert_equal [ant, beetle].map(&:object_id), @board.source[[1,-1]].map(&:object_id)
 
     @game.expect :turn, 3
 
@@ -33,7 +33,7 @@ class TestBeetle < HiveTestCase
     # Moving the beetle should uncover the ant
     spider = @board[0,0]
     beetle.move([0,0])
-    assert_equal [spider, beetle], @board.source[[0,0]]
+    assert_equal [spider, beetle].map(&:object_id), @board.source[[0,0]].map(&:object_id)
     assert_equal ant, @board[1,-1]
   end
 

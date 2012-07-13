@@ -1,7 +1,7 @@
 require 'delegate'
 
-require_relative 'stack'
-require_relative 'insect/all'
+require 'hive/stack'
+require 'hive/insect/all'
 
 module Hive
   class Board < Delegator
@@ -87,7 +87,7 @@ module Hive
                              (insect.player.current_player?) ? 0 : 1 ] }]
       end
 
-      { source:source }.to_json(*a)
+      { :source => source }.to_json(*a)
     end
 
     def to_s
@@ -95,7 +95,7 @@ module Hive
 
       rows = self.to_a do |insect|
         color = (insect.nil?) ? 37 : (insect.player.current_player?) ? 32 : 31
-        letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0]
+        letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0].chr
         "\e[#{color}m#{letter}\e[0m"
       end
 
@@ -115,7 +115,8 @@ module Hive
 
     def [](*location); self.source[location].top; end
 
-    def []=(*location, insect)
+    def []=(*location)
+      insect = location.pop
       self.source[location] ||= Stack.new(*location)
       self.source[location] << insect
       insect.stack = self.source[location]
@@ -155,7 +156,7 @@ module Hive
         [location, self.source[location]]
       end
       spaces,insects = neighbors.select {|_,stack| stack }.partition {|_,stack| stack.empty? }
-      { spaces:spaces.map {|k,_| k }, insects:insects.map {|_,v| v.top } }
+      { :spaces => spaces.map {|k,_| k }, :insects => insects.map {|_,v| v.top } }
     end
   end
 end

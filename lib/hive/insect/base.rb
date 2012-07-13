@@ -1,6 +1,6 @@
 require 'json'
 
-require_relative '../hive'
+require 'hive'
 
 module Hive
   class InvalidLocation < HiveError; end
@@ -18,7 +18,8 @@ module Hive
       end
       
       def to_json(*a)
-        { klass:self.class.name.split('::').last, location:self.location }.to_json(*a)
+        { :klass => self.class.name.split('::').last,
+          :location => self.location }.to_json(*a)
       end
       
       def to_s; "<#{self.class.to_s.split('::').last}#{self.location}>"; end

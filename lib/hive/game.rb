@@ -1,9 +1,9 @@
 require 'json'
 require 'set'
 
-require_relative '../hive'
-require_relative 'board'
-require_relative 'insect/all'
+require 'hive'
+require 'hive/board'
+require 'hive/insect/all'
 
 module Hive
   class Game
@@ -51,9 +51,9 @@ module Hive
     end
 
     def to_json(*a)
-      { players:self.players.map(&:name),
-        turn:self.turn,
-        board:self.board }.to_json(*a)
+      { :players => self.players.map(&:name),
+        :turn => self.turn,
+        :board => self.board }.to_json(*a)
     end
 
     attr_reader :board, :insects, :players

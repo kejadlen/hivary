@@ -2,7 +2,9 @@ require 'set'
 
 $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 
-require 'simplecov'; SimpleCov.start { command_name 'MiniTest' }
+if RUBY_VERSION >= '1.9'
+  require 'simplecov'; SimpleCov.start { command_name 'MiniTest' } 
+end
 
 # require 'fivemat/minitest/autorun'
 require 'minitest/autorun'
@@ -12,6 +14,12 @@ require 'hive'
 # So we don't need to do mock.expect :hash everywhere.
 class MiniTest::Mock
   def hash; super; end
+end
+
+class Array
+  def sample
+    self[rand(self.length)]
+  end
 end
 
 class GameMock < MiniTest::Mock

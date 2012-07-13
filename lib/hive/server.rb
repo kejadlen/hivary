@@ -68,14 +68,14 @@ module Hive
       game = Game.new
       self.server.games << game
 
-      { id:game.object_id }
+      { :id => game.object_id }
     end
 
     def game(game_id)
       game = self.server.games.find {|game| game.object_id == game_id }
       raise NoGameError if game.nil?
 
-      {game:game.to_json}
+      {:game => game.to_json}
     end
 
     def games
@@ -97,13 +97,13 @@ module Hive
 
         game.start
 
-        self.opponent.connection.send_object({ status:200,
-                                               method:'join_game',
-                                               body:{ id:game.current_player.object_id,
-                                                      opp_id:self.player.object_id }})
+        self.opponent.connection.send_object({ :status => 200,
+                                               :method => 'join_game',
+                                               :body => { :id => game.current_player.object_id,
+                                                          :opp_id => self.player.object_id }})
       end
 
-      hash = { id:game.current_player.object_id }
+      hash = { :id => game.current_player.object_id }
       hash[:opp_id] = self.opponent.object_id if self.opponent
       hash
     end
@@ -117,12 +117,12 @@ module Hive
 
       self.player.move(insect, location)
 
-      self.opponent.connection.send_object({status:200,
-                                            method:'move',
-                                            body:{id:self.player.object_id,
-                                                  last_move:last_move}})
+      self.opponent.connection.send_object({:status => 200,
+                                            :method => 'move',
+                                            :body => {:id => self.player.object_id,
+                                                      :last_move => last_move}})
 
-      {id:self.player.object_id, last_move:last_move}
+      {:id => self.player.object_id, :last_move => last_move}
     end
 
     def register(name)
@@ -150,7 +150,7 @@ module Hive
         end
       end
     rescue JSON::ParserError
-      self.send_object({status:401})
+      self.send_object({:status => 401})
     end
 
     def receive_object(obj)
@@ -160,14 +160,14 @@ module Hive
       args = obj['args'] || []
       if ALLOWED_METHODS.include?(method)
         result = self.send(method, *args)
-        self.send_object({status:200, method:method, body:result})
+        self.send_object({:status => 200, :method => method, :body => result})
       else
-        self.send_object({status:405})
+        self.send_object({:status => 405})
       end
     rescue ServerError => e
-      self.send_object({status:409, method:method, body:e.class.to_s.split('::').last})
+      self.send_object({:status => 409, :method => method, :body => e.class.to_s.split('::').last})
     rescue HiveError => e
-      self.send_object({status:409, method:method, body:e.class.to_s.split('::').last})
+      self.send_object({:status => 409, :method => method, :body => e.class.to_s.split('::').last})
     end
     
     def send_object(obj)

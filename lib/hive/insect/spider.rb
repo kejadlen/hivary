@@ -1,4 +1,4 @@
-require_relative 'base'
+require 'hive/insect/base'
 
 module Hive
   module Insect
@@ -12,7 +12,7 @@ module Hive
         self.board.source.delete(self.location)
 
         moves &= self.neighbors[:insects].inject([]) {|ary,insect| ary + insect.neighbors[:spaces] }
-        moves.select! {|move| self.board.can_slide?(self.location, move) }
+        moves = moves.select {|move| self.board.can_slide?(self.location, move) }
         moves.map! {|move| [move] }
 
         until moves.empty? or moves.first.length == 3

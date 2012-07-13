@@ -42,7 +42,7 @@ class TestServer < HiveTestCase
       @server.start
 
       @alice = EM.connect('0.0.0.0', 3000, FakeSocketClient)
-      @alice.send_object({method:'register', args:['alice']})
+      @alice.send_object({:method => 'register', :args => ['alice']})
       @alice.onreceive {}
 
       @bob = EM.connect('0.0.0.0', 3000, FakeSocketClient)
@@ -76,7 +76,7 @@ class TestServer < HiveTestCase
 
   def test_method_not_allowed
     em do
-      @alice.send_object({method:'foo', args:['bob']})
+      @alice.send_object({:method => 'foo', :args => ['bob']})
       @alice.onreceive do |obj|
         assert_equal 405, obj['status']
         stop
@@ -86,7 +86,7 @@ class TestServer < HiveTestCase
 
   def test_register
     em do
-      @alice.send_object({method:'register', args:['bob']})
+      @alice.send_object({:method => 'register', :args => ['bob']})
       @alice.onreceive do |obj|
         assert_equal 200, obj['status']
         refute_nil obj['body']
@@ -100,7 +100,7 @@ class TestServer < HiveTestCase
 
   def test_register_error
     em do
-      @bob.send_object({method:'register', args:['alice']})
+      @bob.send_object({:method => 'register', :args => ['alice']})
       @bob.onreceive do |obj|
         assert_equal 409, obj['status']
         assert_equal 'DuplicateNameError', obj['body']
@@ -111,16 +111,16 @@ class TestServer < HiveTestCase
 
   def test_games
     em do
-      @alice.send_object({method:'games'})
+      @alice.send_object({:method => 'games'})
       @alice.onreceive do |obj|
         assert_equal 200, obj['status']
         assert_equal [], obj['body']
       end
 
-      @alice.send_object({method:'create_game'})
+      @alice.send_object({:method => 'create_game'})
       @alice.onreceive {}
 
-      @alice.send_object({method:'games'})
+      @alice.send_object({:method => 'games'})
       @alice.onreceive do |obj|
         game = @server.games[0]
 
@@ -134,7 +134,7 @@ class TestServer < HiveTestCase
 
   def test_create_game
     em do
-      @alice.send_object({method:'create_game'})
+      @alice.send_object({:method => 'create_game'})
       @alice.onreceive do |obj|
         assert_equal 200, obj['status']
 
@@ -152,24 +152,24 @@ class TestServer < HiveTestCase
   def test_join_game
     em(2) do
       bob = EM.connect('0.0.0.0', 3000, FakeSocketClient)
-      bob.send_object({method:'register', args:['bob']})
+      bob.send_object({:method => 'register', :args => ['bob']})
       bob.onreceive {}
 
       game_id = nil
 
-      @alice.send_object({method:'create_game'})
+      @alice.send_object({:method => 'create_game'})
 
       @alice.onreceive do |obj|
         game_id = obj['body']['id']
 
-        @alice.send_object({method:'join_game', args:[game_id]})
+        @alice.send_object({:method => 'join_game', :args => [game_id]})
       end
 
       @alice.onreceive do |obj|
         assert_equal 200, obj['status']
         refute_empty @server.games[0].players
 
-        bob.send_object({method:'join_game', args:[game_id]})
+        bob.send_object({:method => 'join_game', :args => [game_id]})
       end
 
       bob.onreceive do |obj|
@@ -189,10 +189,10 @@ class TestServer < HiveTestCase
   def test_join_game_error
     em do
       socket = EM.connect('0.0.0.0', 3000, FakeSocketClient)
-      socket.send_object({method:'register', args:['bob']})
+      socket.send_object({:method => 'register', :args => ['bob']})
       socket.onreceive {}
 
-      socket.send_object({method:'join_game', args:[123456789]})
+      socket.send_object({:method => 'join_game', :args => [123456789]})
       socket.onreceive do |obj|
         assert_equal 409, obj['status']
         stop
@@ -203,23 +203,23 @@ class TestServer < HiveTestCase
   def test_move
     em(2) do
       socket = EM.connect('0.0.0.0', 3000, FakeSocketClient)
-      socket.send_object({method:'register', args:['bob']})
+      socket.send_object({:method => 'register', :args => ['bob']})
       socket.onreceive {}
 
       game_id = nil
       sockets = [@alice, socket]
       insect = nil
 
-      @alice.send_object({method:'create_game'})
+      @alice.send_object({:method => 'create_game'})
 
       @alice.onreceive do |obj|
         game_id = obj['body']['id']
 
-        @alice.send_object({method:'join_game', args:[game_id]})
+        @alice.send_object({:method => 'join_game', :args => [game_id]})
       end
 
       @alice.onreceive do |obj|
-        socket.send_object({method:'join_game', args:[game_id]})
+        socket.send_object({:method => 'join_game', :args => [game_id]})
       end
 
       @alice.onreceive {}
@@ -228,8 +228,8 @@ class TestServer < HiveTestCase
         players = @server.games[0].players
         sockets << sockets.shift if players[0].name != 'alice'
 
-        insect = players[0].insects.reject {|insect| Insect::Queen === insect }.sample
-        sockets[0].send_object({method:'move', args:[insect, [0,0]]})
+        insects = players[0].insects.reject {|insect| Insect::Queen === insect }.sample
+        sockets[0].send_object({:method => 'move', :args => [insect, [0,0]]})
       end
 
       sockets[0].onreceive do |obj|
@@ -248,7 +248,7 @@ class TestServer < HiveTestCase
 
   def test_unregister
     em do
-      @alice.send_object({method:'register', args:['bob']})
+      @alice.send_object({:method => 'register', :args => ['bob']})
       @alice.onreceive do
         @alice.close_connection
         stop
@@ -264,7 +264,7 @@ class TestServer < HiveTestCase
       game = Game.new(@players, @board)
       @server.games << game
 
-      @alice.send_object({method:'game', args:[game.object_id]})
+      @alice.send_object({:method => 'game', :args => [game.object_id]})
       @alice.onreceive do |obj|
         assert_equal 200, obj['status']
         assert_equal game.to_json, obj['body']['game']
