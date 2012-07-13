@@ -154,7 +154,7 @@ module Hive
     end
 
     def receive_object(obj)
-      self.logger.info("received object #{obj}")
+      self.logger.info("received object #{obj.inspect}")
 
       method = obj['method']
       args = obj['args'] || []

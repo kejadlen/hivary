@@ -10,6 +10,12 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 require 'hive'
 require 'hive/server'
 
+class Array
+  def sample
+    self[rand(self.length)]
+  end
+end
+
 module Hive
   class Client < EM::Connection
     attr_accessor :logger
@@ -63,7 +69,7 @@ module Hive
 
     def method_missing(method, *args)
       if Connection::ALLOWED_METHODS.include?(method.to_s)
-        self.send_object({method:method, args:args})
+        self.send_object({:method => method, :args => args})
       else
         super
       end
@@ -82,7 +88,7 @@ module Hive
     end
 
     def receive_object(obj)
-      @logger.debug("received object #{obj}")
+      @logger.debug("received object #{obj.inspect}")
 
       method = "_#{obj['method']}"
       method << '_error' if obj['status'] != 200
@@ -92,7 +98,7 @@ module Hive
     end
 
     def send_object(obj)
-      @logger.debug("sending object #{obj}")
+      @logger.debug("sending object #{obj.inspect}")
 
       super(obj)
     end
