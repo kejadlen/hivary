@@ -8,10 +8,11 @@ group :test do
   gem 'minitest', '~> 3.0'
   gem 'rb-readline'
   gem 'simplecov'
-  gem 'ZenTest'
 
   gem 'pry'
   gem 'pry-nav'
+
+  gem 'metric_fu', :git => 'https://github.com/jscruggs/metric_fu.git'
 end
 
 gem 'eventmachine'
