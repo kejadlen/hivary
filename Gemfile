@@ -17,5 +17,6 @@ end
 
 gem 'eventmachine'
 gem 'em-websocket'
+gem 'json'
 gem 'highline'
 gem 'thor'
