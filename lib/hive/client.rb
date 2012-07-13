@@ -102,7 +102,7 @@ module Hive
     def game_over
       say('Game over!')
 
-      winner = game.players.delete_if {|player| player.queen.surrounded? }
+      winner = @player.game.players.delete_if {|player| player.queen.surrounded? }
       if winner.empty?
         say("Tie - both queens are surrounded!")
       elsif winner[0] == @player
@@ -149,7 +149,7 @@ module Hive
     end
 
     def game_over
-      winner = game.players.delete_if {|player| player.queen.surrounded? }
+      winner = @player.game.players.delete_if {|player| player.queen.surrounded? }
 
       if winner.empty?
         say("Tie - both queens are surrounded!")
@@ -158,6 +158,8 @@ module Hive
       else
         say("You lose!")
       end
+
+      exit
     end
 
     def make_move
