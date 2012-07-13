@@ -125,7 +125,7 @@ class TestServer < HiveTestCase
         game = @server.games[0]
 
         assert_equal 200, obj['status']
-        assert_equal [[game.object_id, 'alice']], obj['body']
+        assert_equal [[game.object_id, '']], obj['body']
 
         stop
       end

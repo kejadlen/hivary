@@ -55,7 +55,7 @@ class TestQueen < HiveTestCase
     @alice.insects.delete(@queen)
 
     queen = @board[0,0]
-    assert_equal [[-1,0], [0,1], [1,-1], [1,0]], queen.valid_moves
+    assert_equal [[1,0], [-1,0], [0,1], [1,-1]], queen.valid_moves
   end
 
   def test_cant_move_off_the_hive

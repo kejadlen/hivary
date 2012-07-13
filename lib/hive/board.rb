@@ -37,7 +37,12 @@ module Hive
 
       def neighbors(x, y)
         offset = 1 - 2 * (y % 2) # the offset in the x-axis depends on the row
-        (NEIGHBORS + [[offset,1],[offset,-1]]).map {|i,j| [x+i, y+j] }.sort
+        neighbors = (NEIGHBORS + [[offset,1],[offset,-1]]).map {|i,j| [x+i, y+j] }
+        if y % 2 == 1
+          neighbors[2], neighbors[4] = neighbors[4], neighbors[2] 
+          neighbors[3], neighbors[5] = neighbors[5], neighbors[3] 
+        end
+        neighbors
       end
       
       def one_hive?(locations)

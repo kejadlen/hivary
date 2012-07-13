@@ -73,9 +73,9 @@ class TestBoard < HiveTestCase
     neighbors = @board.neighbors(0,0)
 
     assert_equal 3, neighbors[:spaces].length
-    assert_equal [[-1,0], [0,-1], [0,1]], neighbors[:spaces]
+    assert_equal [[-1,0], [0,1], [0,-1]], neighbors[:spaces]
     assert_equal 3, neighbors[:insects].length
-    assert_equal [[1,-1], [1,0], [1,1]], neighbors[:insects].map(&:location)
+    assert_equal [[1,0], [1,1], [1,-1]], neighbors[:insects].map(&:location)
   end
 
   def test_to_a
