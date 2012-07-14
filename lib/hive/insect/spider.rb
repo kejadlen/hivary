@@ -19,7 +19,8 @@ module Hive
           move = moves.shift
 
           neighbors = self.board.neighbors(*move.last)
-          (neighbors[:spaces] & neighbors[:insects].inject([]) {|ary,insect| ary + insect.neighbors[:spaces] }).each do |space|
+          spaces = neighbors[:spaces] & neighbors[:insects].inject([]) {|ary,insect| ary + insect.neighbors[:spaces] }
+          spaces.each do |space|
             next unless self.board.can_slide?(move.last, space)
             moves << (move.dup << space) unless space == move.first # can't backtrack
           end
