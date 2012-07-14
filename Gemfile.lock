@@ -134,6 +134,7 @@ DEPENDENCIES
   guard-bundler
   guard-minitest
   highline
+  json
   metric_fu!
   minitest (~> 3.0)
   pry

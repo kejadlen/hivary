@@ -188,7 +188,7 @@ module Hive
               self.print_moves(insect, locations)
 
               locations.each do |location|
-                submenu.choice(location) do
+                submenu.choice(location.inspect) do
                   self.move(insect, location)
                 end
               end
@@ -213,13 +213,14 @@ module Hive
     end
 
     def print_moves(insect, locations)
-      locations = locations.map.with_index {|l,i| [l, (?a.ord+i).chr] }
+      moves = {}
+      locations.each_with_index {|l,i| moves[l] = (?a+i).chr }
 
       output = @player.game.board.to_s do |stack,color,letter|
-        loc = locations.assoc(stack.location)
-        if loc
+        move = moves[stack.location]
+        if move
           color = '1;33'
-          letter = loc[1]
+          letter = move
         end
         [color, letter]
       end
