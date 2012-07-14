@@ -70,17 +70,6 @@ module Hive
       @source = source || { [0,0] => Stack.new(0,0) }
     end
 
-    def to_a
-      rows = Hash.new {|h,k| h[k] = Hash.new } # remapping the source to be indexed by coordinates
-
-      # Get a row-by-row hash of the board
-      self.each do |location,stack|
-        rows[location[1]][location[0]] = yield(stack.top)
-      end
-
-      rows.sort_by {|k,_| k }.reverse
-    end
-
     def to_json(*a)
       source = @source.reject {|_,v| v.empty? }.map do |k,v|
         [k, v.map {|insect| [insect.class.name.split('::').last,
@@ -90,16 +79,23 @@ module Hive
       { source:source }.to_json(*a)
     end
 
-    def to_s
-      min_x = self.min_x
+    def to_s(&block)
+      block ||= lambda {|_,c,l| [c,l]}
 
-      rows = self.to_a do |insect|
+      # remapping the source to be indexed by coordinates
+      rows = Hash.new {|h,k| h[k] = Hash.new } 
+
+      # Get a row-by-row hash of the board
+      self.each do |location,stack|
+        insect = stack.top
         color = (insect.nil?) ? 37 : (insect.player.current_player?) ? 32 : 31
         letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0]
-        "\e[#{color}m#{letter}\e[0m"
+        color,letter = block.call(stack, color, letter)
+        rows[location[1]][location[0]] = "\e[#{color}m#{letter}\e[0m"
       end
 
-      output = rows.inject('') do |n,(i,row)|
+      min_x = self.min_x
+      output = rows.sort_by {|k,_| k }.reverse.inject('') do |n,(i,row)|
         # Fill in the empty spaces
         row = Array.new(row.keys.max - min_x + 1) {|j| row[j+min_x] or ' ' }
 
