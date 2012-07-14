@@ -170,7 +170,7 @@ module Hive
 
       insects = @player.legal_insects
 
-      say(@player.game.board.to_s)
+      self.print_last_move
 
       choose do |menu|
         insects.each do |insect,locations|
@@ -192,6 +192,30 @@ module Hive
           end
         end
       end
+    end
+
+    def print_last_move
+      game = @player.game
+      last_insect = game.board[*@body['last_move'][1]] rescue NullObject
+
+      rows = game.board.to_a do |insect|
+        color = (insect.nil?) ? 37 : (insect.player.current_player?) ? '1;32' : '1;31'
+        color << ';44' if insect == last_insect
+        letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0]
+        "\e[1;#{color}m#{letter}\e[0m"
+      end
+
+      # Transform the hash into the output string
+      min_x = game.board.min_x
+      output = rows.inject('') do |n,(i,row)|
+        # Fill in the empty spaces
+        row = Array.new(row.keys.max - min_x + 1) {|j| row[j+min_x] or ' ' }
+
+      n << ' ' if i % 2 == 0 # offset for even rows
+      n << row.join(' ') << "\n"
+      end
+
+      say(output.chomp)
     end
 
     def print_board(insect, locations)
