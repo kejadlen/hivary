@@ -78,12 +78,6 @@ class TestBoard < HiveTestCase
     assert_equal [[1,0], [1,1], [1,-1]], neighbors[:insects].map(&:location)
   end
 
-  def test_to_a
-    ary = @board.to_a {|insect| insect }
-    assert_equal [2, {-1 => nil, 0 => nil}], ary[0]
-    assert_equal [-1, {0 => nil, 1 => nil}], ary[3]
-  end
-
   def test_to_s
     assert_equal " \e[37mE\e[0m \e[37mE\e[0m\n\e[37mE\e[0m \e[31mA\e[0m \e[37mE\e[0m\n \e[37mE\e[0m \e[32mS\e[0m \e[37mE\e[0m\n  \e[37mE\e[0m \e[37mE\e[0m", @board.to_s
   end

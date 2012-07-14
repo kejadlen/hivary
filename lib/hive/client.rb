@@ -176,7 +176,7 @@ module Hive
 
       insects = @player.legal_insects
 
-      say(@player.game.board.to_s)
+      self.print_last_move
 
       choose do |menu|
         insects.each do |insect,locations|
@@ -185,7 +185,7 @@ module Hive
             choose do |submenu|
               submenu.index = :letter
 
-              self.print_board(insect, locations)
+              self.print_moves(insect, locations)
 
               locations.each do |location|
                 submenu.choice(location) do
@@ -200,27 +200,28 @@ module Hive
       end
     end
 
-    def print_board(insect, locations)
-      min_x = @player.game.board.min_x
-      rows = @player.game.board.to_a do |insect|
-        color = (insect.nil?) ? 37 : (insect.player.current_player?) ? 32 : 31
-        letter = (insect.nil?) ? 'E' : insect.class.to_s.split('::').last[0]
-        "\e[#{color}m#{letter}\e[0m"
+    def print_last_move
+      game = @player.game
+      last_insect = game.board[*@body['last_move'][1]] rescue NullObject
+
+      output = @player.game.board.to_s do |stack,color,letter|
+        color = "1;#{color}" if stack.top == last_insect
+        [color, letter]
       end
 
-      index = 'a'
-      locations.each do |x,y|
-        rows.assoc(y).last[x] = "\e[1;33m#{index}\e[0m"
-        index.succ!
-      end
+      say(output.chomp)
+    end
 
-      # Transform the hash into the output string
-      output = rows.inject('') do |n,(i,row)|
-        # Fill in the empty spaces
-        row = Array.new(row.keys.max - min_x + 1) {|j| row[j+min_x] or ' ' }
+    def print_moves(insect, locations)
+      locations = locations.map.with_index {|l,i| [l, (?a.ord+i).chr] }
 
-      n << ' ' if i % 2 == 0 # offset for even rows
-      n << row.join(' ') << "\n"
+      output = @player.game.board.to_s do |stack,color,letter|
+        loc = locations.assoc(stack.location)
+        if loc
+          color = '1;33'
+          letter = loc[1]
+        end
+        [color, letter]
       end
 
       say(output.chomp)
