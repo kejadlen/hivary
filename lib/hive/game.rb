@@ -38,16 +38,12 @@ module Hive
     end
 
     def initialize(players=[], board=nil, turn=nil, expansions=[])
-      @insects = START_INSECTS.dup
-
       @players = players
       @players.each {|player| player.game = self }
 
       @board = board || Board.new
       @turn = turn
-
-      @insects[Insect::Ladybug] = 1 if expansions.include?(:ladybug)
-      @insects[Insect::Mosquito] = 1 if expansions.include?(:mosquito)
+      @expansions = expansions
     end
 
     def to_json(*a)
@@ -56,10 +52,17 @@ module Hive
         :board => self.board }.to_json(*a)
     end
 
-    attr_reader :board, :insects, :players
+    attr_reader :board, :expansions, :players
     attr_accessor :turn
 
     def current_player; self.players.first; end
+
+    def insects
+      insects = START_INSECTS.dup
+      insects[Insect::Ladybug] = 1 if expansions.include?(:ladybug)
+      insects[Insect::Mosquito] = 1 if expansions.include?(:mosquito)
+      insects
+    end
 
     def start
       raise IllegalOperation, 'Game has already started' unless self.turn.nil?

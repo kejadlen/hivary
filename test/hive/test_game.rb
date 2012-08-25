@@ -87,4 +87,19 @@ class TestGame < HiveTestCase
     assert_equal JSON.load(@game.board.to_json), json['board']
     assert_equal @game.turn, json['turn']
   end
+
+  def test_expansions
+    @game.expansions << :ladybug
+    
+    [@alice, @bob].each {|player| player.join_game(@game) }
+    @game.start
+
+    assert_includes @game.insects, Insect::Ladybug
+    assert_equal @game.insects[Insect::Ladybug], 1
+
+    @game.expansions << :mosquito
+
+    assert_includes @game.insects, Insect::Mosquito
+    assert_equal @game.insects[Insect::Mosquito], 1
+  end
 end
