@@ -5,15 +5,9 @@ require_relative 'base'
 module Hive
   module Insect
     class Mosquito < Base
-      def validate_move
-        super
-      rescue OneHiveError
-        raise unless self.on_top?
-      end
+      include Climber
 
       def valid_moves
-        return Board.neighbors(*self.location) if self.on_top?
-        
         extra_spaces = self.neighbors[:spaces].select do |space|
           self.board.neighbors(*space)[:insects] == [self]
         end

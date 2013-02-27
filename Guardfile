@@ -1,5 +1,3 @@
-interactor :readline
-
 guard 'bundler' do
   watch('Gemfile')
   # Uncomment next line if Gemfile contain `gemspec' command
