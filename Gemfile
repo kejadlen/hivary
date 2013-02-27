@@ -1,4 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 
 group :test do
   gem 'fivemat'
@@ -7,7 +7,6 @@ group :test do
   gem 'guard-minitest'
   gem 'rb-fsevent'
   gem 'minitest'
-  gem 'minitest-emoji'
   gem 'rb-readline'
   gem 'simplecov'
   gem 'metric_fu'

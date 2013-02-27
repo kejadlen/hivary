@@ -6,7 +6,6 @@ require 'simplecov'; SimpleCov.start { command_name 'MiniTest' }
 
 # require 'fivemat/minitest/autorun'
 require 'minitest/autorun'
-require 'minitest/emoji'
 require 'minitest/pride'
 
 require 'hive'
