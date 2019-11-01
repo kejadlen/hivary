@@ -51,7 +51,7 @@ GEM
       rake (>= 0.8, < 11.0)
     i18n (0.6.1)
     japgolly-Saikuro (1.1.1.0)
-    json (1.7.6)
+    json (1.7.7)
     json_pure (1.7.6)
     listen (0.7.2)
     lumberjack (1.0.2)
