@@ -131,7 +131,7 @@ GEM
     thor (0.16.0)
     thread_safe (0.3.6)
     tilt (2.0.10)
-    tzinfo (0.3.55)
+    tzinfo (0.3.61)
 
 PLATFORMS
   ruby
